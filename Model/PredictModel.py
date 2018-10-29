@@ -7,19 +7,15 @@ import numpy as np
 import argparse
 import time
 import sys
-import cv2
 import glob
 
 img_width, img_height = 100, 100
 
-
 def convert_to_array(img):
-    im = cv2.imread(img)
-    img = Image.fromarray(im, 'RGB')
-    image = img.resize((img_width, img_height))
-    image.save("resizedimage.jpg") 
-    return np.array(image)
-
+    image = np.array(Image.open(img), dtype=np.uint8)
+    img_from_ar = Image.fromarray(image, 'RGB')
+    resized_image = img_from_ar.resize((img_width, img_height))
+    return np.array(resized_image)
 
 def get_animal_name(score):
     print(score[0])
@@ -43,22 +39,20 @@ def predict_animal(file, model):
 
 
 def predict_folder(destination):
-    model = load_model('Model.h5')
+    model = load_model('Model/Model.h5')
     predictions_array = []
-    files = glob.glob(destination + "/*.jpg")
-
+    files = glob.glob(destination + "/*.png")
     for x in range(0, len(files)):
         predictions_array.append(predict_animal(files[x], model))
 
     return most_common(predictions_array)
 
 def predict_file(file):
-    model = load_model('Model.h5')
+    model = load_model('Model/Model.h5')
     return predict_animal(file, model)
 
 def most_common(lst):
     return max(set(lst), key=lst.count)
 
-
 if __name__ == "__main__":
-	predict_file(sys.argv[1])
+    print(predict_file(sys.argv[1]))

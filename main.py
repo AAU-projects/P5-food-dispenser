@@ -1,74 +1,113 @@
 import nxt
 import numpy
 import os
+import nxt.locator
 
 from nxt.sensor import *
-from picture import take_pictures
-from Model.PredictModel import predict
-
+from nxt.motor import *
+from picture import take_pictures_CV2
+from time import sleep
+from predicter import predict_folder
 
 ULTRASONICPORT = PORT_1
-DIRECTORY = os.path.join(os.getcwd(),"pictures")
-BOWLPOS = 0 # 0 = in, 1 = out
-BOWLROT = 0 # 0 = cat, 1 = dog
+DIRECTORY = os.path.join(os.getcwd(), "pictures")
+BOWLPOS = 0	 # 0 = in, 1 = out
+BOWLROT = 0	 # 0 = cat, 1 = dog
+BOWLPORT = PORT_B
+MOTORPORT = PORT_A
+GATEPORT = PORT_C
+GATEPOS = 0	 # 0 = closed, 1 = open
+MOTORSPEED = 0.5
+
+BRICK = nxt.locator.find_one_brick()
+
 
 def main():
-	controller = nxt.locator.find_one_brick()
-
-	oldDist = Ultrasonic(controller, ULTRASONICPORT).get_sample()
-
+	oldDist = Ultrasonic(BRICK, ULTRASONICPORT).get_sample()
 	running = True
+	print("Starting while loop")
 	while running:
-		newDist = Ultrasonic(controller, ULTRASONICPORT).get_sample()
-		
+		print("Inside while loop")
+		newDist = Ultrasonic(BRICK, ULTRASONICPORT).get_sample()
+
 		if newDist != oldDist:
 			oldDist = newDist
-			take_pictures(DIRECTORY)
+			
+			take_pictures_CV2(DIRECTORY)
+			print("Pics taken")
 
 			# send pictures to ML
-			result = predict(DIRECTORY)
+			result = predict_folder(DIRECTORY)
+			
 			# do something based on ML respond
-      			# Bowl is in
-      			if BOWLPOS == 0:
-        			# Its a dogo
-				if result == 1:
-          				# The bowl is in cat rotarion
-          				if BOWLROT == 0:
-						rotate_bowl()
-          				# dispense food
-          				dispense_food()
-          				# give dogo food
-          				change_bowl_pos()
-        			# Its a cat
-        			if result == 0:
-          				# The bowl is in dog rotarion
-          				if BOWLROT == 1:
-				 		rotate_bowl()
-          				# dispense food
-          				dispense_food()
-          				# give cat food
-          				change_bowl_pos()
-			else:
-				change_bowl_pos()
+			dispense_food(result)
+			
+			#Wait for the animal to finish, then close
+			wait_and_close()
+			
 
+def dispense_food(animal):
+	if BOWLROT != animal:
+		rotate_bowl()
+		
+	# dispense food
+	open_containers()
+	# give cat food
+	turn_gate()
+	change_bowl_pos()
+	
+def wait_and_close():
+	done = 0
+	count = 0
+	
+	while(not done):
+		oldDist = Ultrasonic(BRICK, ULTRASONICPORT).get_sample()
+		sleep(2)
+		newDist = Ultrasonic(BRICK, ULTRASONICPORT).get_sample()
+		
+		if oldDist == newDist:
+			count += 1
+			print("WaitCount: " + str(count))
+		
+		if count >= 3:
+			done = 1
 
-def dispense_food():
-	# Open for food
+	change_bowl_pos()
+	turn_gate()
+
+def open_containers():
 	pass
+
 
 def rotate_bowl():
 	# Rotate the bowl 180
-	pass
+	turn_motor(BOWLPORT, -45, 350)
+
 
 def change_bowl_pos():
-	# drive bowl in and out
-	pass
+	global BOWLPOS
+	#  Drive bowl in and out
+	if BOWLPOS == 0:
+		turn_motor(MOTORPORT, 45, 350)
+		BOWLPOS = 1
+	elif BOWLPOS == 1:
+		turn_motor(MOTORPORT, -45, 350)
+		BOWLPOS = 0
 
-def setup():
-	if not os.path.exists(DIRECTORY):
-    		os.makedirs(DIRECTORY)
 
+def turn_gate():
+	global GATEPOS
+	if GATEPOS == 0:
+		turn_motor(GATEPORT, 45, 630)
+		GATEPOS = 1
+	elif GATEPOS == 1:
+		turn_motor(GATEPORT, -45, 630)
+		GATEPOS = 0
+
+
+def turn_motor(port, speed, range):
+	motor = Motor(BRICK, port)
+	motor.turn(int(speed * MOTORSPEED), range)
 
 if __name__ == "__main__":
-	setup()
 	main()

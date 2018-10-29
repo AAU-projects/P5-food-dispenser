@@ -24,5 +24,5 @@ while True:
 	
 	measure_temp()
 	print "Current temp: " +str(temp) + "\nHighest: " +str(high) + "\nLowest: " +str(low)
-	time.sleep(1)
+	time.sleep(2)
 	clear()
