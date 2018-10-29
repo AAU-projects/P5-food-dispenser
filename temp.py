@@ -23,6 +23,8 @@ def measure_temp():
 while True:
 	
 	measure_temp()
+	if temp >= 85:
+		os.system("sudo shutdown now -h")
 	print "Current temp: " +str(temp) + "\nHighest: " +str(high) + "\nLowest: " +str(low)
 	time.sleep(2)
 	clear()
