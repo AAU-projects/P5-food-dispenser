@@ -5,9 +5,9 @@ import nxt.locator
 
 from nxt.sensor import *
 from nxt.motor import *
-from picture import take_pictures_CV2
+from data.picture import take_pictures_CV2
+from data.predicter import predict_folder
 from time import sleep
-from predicter import predict_folder
 
 ULTRASONICPORT = PORT_1
 DIRECTORY = os.path.join(os.getcwd(), "pictures")
