@@ -10,7 +10,7 @@ import sys
 import glob
 
 img_width, img_height = 100, 100
-model = load_model('Model/Model.h5')
+model = load_model('Model/model.h5')
 
 def convert_to_array(img):
     image = np.array(Image.open(img), dtype=np.uint8)
