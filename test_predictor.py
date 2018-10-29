@@ -8,11 +8,14 @@ DIRECTORY = os.path.join(os.getcwd(), "pictures")
 #Test
 
 while True:
-    #Take pictures
-    take_pictures(DIRECTORY)
-    print("pictures taken")
+    try:
+        #Take pictures
+        take_pictures(DIRECTORY)
+        print("pictures taken")
 
-    #Predict pictures
-    result = predict_folder(DIRECTORY)
-    print(result)
-    time.sleep(1)
+        #Predict pictures
+        result = predict_folder(DIRECTORY)
+        print(result)
+        time.sleep(1)
+    except Exception as e:
+        print(e)
