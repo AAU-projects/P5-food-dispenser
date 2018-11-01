@@ -1,6 +1,9 @@
 import numpy as np
 from math import ceil
-#from keras.models import Sequential
+from keras.models import Sequential
+from keras.layers import Conv2D, Activation, Dense
+
+from generate_labels import img_width_height as imgsize
 
 TEST_RATIO = 0.1
 
@@ -27,9 +30,23 @@ def retrieve_training_test_dataset(animals, labels):
     x_train = animals[ceil(dataset_size*TEST_RATIO):]
     y_train = labels[ceil(dataset_size*TEST_RATIO):]
 
+    return x_train, y_train, x_test, y_test
+
+def create_model(shape):    
+    model = Sequential()
+
+    #https://keras.io/layers/convolutional/#conv2d
+    model.add(Conv2D(imgsize[0], (3,3), padding='same', activation='relu', input_shape=shape))
+
+    return model
+
+
 def train_model():
     animals, labels, shape = retrieve_dataset()
-    retrieve_training_test_dataset(animals, labels)
+    model = create_model(shape)
+    x_train, y_train, x_test, y_test = retrieve_training_test_dataset(animals, labels)
+
+
 
 if __name__ == "__main__":
     train_model()
