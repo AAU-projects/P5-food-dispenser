@@ -1,3 +1,5 @@
 data/*
 .vs/*
 .vscode/*
+test_files/*
+*.h5
