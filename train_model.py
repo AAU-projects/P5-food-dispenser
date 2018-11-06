@@ -7,7 +7,7 @@ from keras.models import Sequential
 from keras.layers import Conv2D, Activation, Dense, MaxPooling2D, Flatten, Dropout
 from keras.utils import np_utils
 
-epoch_size = 10 # total number of runs
+epoch_size = 50 # total number of runs
 batch_size = 16 # parts to split dataset into
 TRAIN_PATH = 'data/train'
 VALIDATION_PATH = 'data/validation'
@@ -50,15 +50,22 @@ def retrieve_generators():
 
     return train_generator, validation_generator
 
+def shuffle(x, y):
+    shape = np.arange(x.shape[0])
+    np.random.shuffle(shape)
+    x = x[shape]
+    y = y[shape]
+    return x, y
+
 def retrive_dataset():
     animals_train = np.load("data/train/animals_train.npy")
     labels_train = np.load("data/train/labels_train.npy")
-
+    animals_train, labels_train = shuffle(animals_train, labels_train)
     animals_train = animals_train.astype('float32')/255
 
     animals_validation = np.load("data/validation/animals_validation.npy")
     labels_validation = np.load("data/validation/labels_validation.npy")
-
+    animals_validation, labels_validation = shuffle(animals_validation, labels_validation)
     animals_validation = animals_validation.astype('float32')/255
 
     num_classes = 2
@@ -91,7 +98,8 @@ def fit_model_generator(model):
     train_generator, validation_generator = retrieve_generators()
     step_size_train = train_generator.n // train_generator.batch_size
     step_size_valid = validation_generator.n // validation_generator.batch_size
-    return model.fit_generator(generator=train_generator, steps_per_epoch=step_size_train, validation_data=validation_generator, validation_steps=step_size_valid, epochs=epoch_size)
+    return model.fit_generator(generator=train_generator, steps_per_epoch=step_size_train, 
+                               validation_data=validation_generator, validation_steps=step_size_valid, epochs=epoch_size)
 
 def fit_model_numpy(model):
     animals_train, labels_train, animals_validation, labels_validation = retrive_dataset()
