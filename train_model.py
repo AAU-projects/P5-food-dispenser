@@ -54,8 +54,12 @@ def retrive_dataset():
     animals_train = np.load("data/train/animals_train.npy")
     labels_train = np.load("data/train/labels_train.npy")
 
+    animals_train = animals_train.astype('float32')/255
+
     animals_validation = np.load("data/validation/animals_validation.npy")
     labels_validation = np.load("data/validation/labels_validation.npy")
+
+    animals_validation = animals_validation.astype('float32')/255
 
     num_classes = 2
     # One hot encoding
