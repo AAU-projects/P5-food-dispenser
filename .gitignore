@@ -1,4 +1,6 @@
 data/*
+models/*
+__pycache__/*
 .vs/*
 .vscode/*
 test_files/*
