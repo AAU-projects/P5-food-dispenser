@@ -5,7 +5,7 @@ import keras
 import os
 from math import ceil
 from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import TensorBoard
+from keras.callbacks import TensorBoard, EarlyStopping
 from keras.models import Sequential
 from keras.layers import Conv2D, Activation, Dense, MaxPooling2D, Flatten, Dropout
 from keras.utils import np_utils
@@ -13,36 +13,41 @@ from decimal import Decimal
 from contextlib import redirect_stdout
 from eval_model import evaluate_model
 
-epoch_size = 2 # total number of runs
-batch_size = 16 # parts to split dataset into
+epoch_size = 1200 # total number of runs
+batch_size = 64 # parts to split dataset into
 TRAIN_PATH = 'data/train'
 VALIDATION_PATH = 'data/validation'
 
+training_lenght = 0
+validation_lenght = 0
+
 img_width, img_height = 128, 128
+
+activation_functions = ['relu', 'relu', 'relu', 'relu', 'softmax']
 
 def create_model():    
     model = Sequential()
 
     model.add(Conv2D(32, (3, 3), input_shape=(img_width, img_height, 3)))
-    model.add(Activation('relu'))
+    model.add(Activation(activation_functions[0]))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Conv2D(32, (3, 3)))
-    model.add(Activation('relu'))
+    model.add(Activation(activation_functions[1]))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Conv2D(64, (3, 3)))
-    model.add(Activation('relu'))
+    model.add(Activation(activation_functions[2]))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
     model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
     model.add(Dense(64))
-    model.add(Activation('relu'))
+    model.add(Activation(activation_functions[3]))
     model.add(Dropout(0.5))
     model.add(Dense(2))
-    model.add(Activation('softmax'))
+    model.add(Activation(activation_functions[4]))
 
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', 'binary_crossentropy'])
     #model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 
     return model    
@@ -79,6 +84,12 @@ def retrive_dataset():
     labels_train = keras.utils.to_categorical(labels_train, num_classes)
     labels_validation = keras.utils.to_categorical(labels_validation,num_classes)
 
+    global training_lenght
+    global validation_lenght
+
+    training_lenght = len(animals_train)
+    validation_lenght = len(animals_validation)
+
     return animals_train, labels_train, animals_validation, labels_validation
 
 def save_model_graph(history, model_path, model_name):
@@ -93,6 +104,23 @@ def save_model_graph(history, model_path, model_name):
     plt.xlabel('Epoch')
     plt.legend(['Train_acc', 'Test_acc', "Train_loss", "Test_loss"], loc='upper left')
     plt.savefig(model_path + "{}_graph.png".format(model_name))
+
+
+def plot_history(histories, key='binary_crossentropy'):
+    plt.figure(figsize=(16,10))
+    
+    for name, history in histories:
+      val = plt.plot(history.epoch, history.history['val_'+key],
+                     '--', label=name.title()+' Val')
+      plt.plot(history.epoch, history.history[key], color=val[0].get_color(),
+               label=name.title()+' Train')
+
+    plt.xlabel('Epochs')
+    plt.ylabel(key.replace('_',' ').title())
+    plt.legend()
+
+    plt.xlim([0,max(history.epoch)])
+    plt.show()
 
 def fit_model_generator(model):
     train_generator, validation_generator = retrieve_generators()
@@ -131,14 +159,24 @@ def save_model_summary(model, model_path, model_name):
     with open(model_path + f"{model_name}_summary.txt", 'w') as f:
         with redirect_stdout(f):
             model.summary()
+            
+        for x in range(0, len(activation_functions)):
+            f.write(f"activation_{x + 1} = {activation_functions[x]}\n")
+        
+        f.write(f"Train set size: {training_lenght}\n")
+        f.write(f"Validation set size: {validation_lenght}\n")
+
 
 def train_model():
     model = create_model()
 
     #TensorBoard
     tensorboard = TensorBoard(log_dir="logs/{}".format(time()));
+    earlyStop = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='auto',restore_best_weights=True)
 
-    history, score = fit_model_numpy(model, [tensorboard])
+    history, score = fit_model_numpy(model, [tensorboard, earlyStop])
+
+    plot_history([('model', history)])
 
     score_rounded = f"{round(score[1], 3):.3f}"
     model_name = get_model_name(score_rounded)
