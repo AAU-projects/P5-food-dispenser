@@ -1,13 +1,17 @@
 import numpy as np
+from time import time
 import matplotlib.pyplot as plt
 import keras
+import os
 from math import ceil
 from keras.preprocessing.image import ImageDataGenerator
+from keras.callbacks import TensorBoard
 from keras.models import Sequential
 from keras.layers import Conv2D, Activation, Dense, MaxPooling2D, Flatten, Dropout
 from keras.utils import np_utils
+from decimal import Decimal
 
-epoch_size = 50 # total number of runs
+epoch_size = 2 # total number of runs
 batch_size = 16 # parts to split dataset into
 TRAIN_PATH = 'data/train'
 VALIDATION_PATH = 'data/validation'
@@ -34,7 +38,7 @@ def create_model():
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
     model.add(Dense(2))
-    model.add(Activation('sigmoid'))
+    model.add(Activation('softmax'))
 
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     #model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
@@ -75,24 +79,18 @@ def retrive_dataset():
 
     return animals_train, labels_train, animals_validation, labels_validation
 
-def plot_model_training(history):
+def save_model_graph(history, model_path, model_name):
     # Plot training & validation accuracy values
     plt.plot(history.history['acc'])
     plt.plot(history.history['val_acc'])
-    plt.title('Model accuracy')
-    plt.ylabel('Accuracy')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Test'], loc='upper left')
-    plt.show()
-
-    # Plot training & validation loss values
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
-    plt.title('Model loss')
-    plt.ylabel('Loss')
+    
+    plt.title('Model accuracy, epochs: {}, batch: {}'.format(epoch_size, batch_size))
+    plt.ylabel('Accuracy/Loss')
     plt.xlabel('Epoch')
-    plt.legend(['Train', 'Test'], loc='upper left')
-    plt.show()
+    plt.legend(['Train_acc', 'Test_acc', "Train_loss", "Test_loss"], loc='upper left')
+    plt.savefig(model_path + "graph_{}.png".format(model_name))
 
 def fit_model_generator(model):
     train_generator, validation_generator = retrieve_generators()
@@ -101,18 +99,56 @@ def fit_model_generator(model):
     return model.fit_generator(generator=train_generator, steps_per_epoch=step_size_train, 
                                validation_data=validation_generator, validation_steps=step_size_valid, epochs=epoch_size)
 
-def fit_model_numpy(model):
+def fit_model_numpy(model, callbacks=None):
     animals_train, labels_train, animals_validation, labels_validation = retrive_dataset()
-    return model.fit(animals_train, labels_train, batch_size=batch_size, epochs=epoch_size, verbose=1, validation_data=(animals_validation, labels_validation))
+    history = model.fit(animals_train, labels_train, batch_size=batch_size, epochs=epoch_size, verbose=1, validation_data=(animals_validation, labels_validation),callbacks=callbacks)
+    score = model.evaluate(animals_validation, labels_validation, verbose=1)
+    return history, score
+
+def create_model_folder(path):
+    if not os.path.exists("models"):
+        os.makedirs("models")
+
+    os.makedirs(path)
+
+def get_model_name(score):
+    save_value = 1
+
+    model_name = "model_{}_{}_{}".format(str(score), epoch_size, batch_size)
+    new_model_name = model_name
+
+    while(os.path.exists("models/" + new_model_name)):
+        new_model_name = model_name + "({})".format(save_value)
+        save_value += 1
+        
+    return new_model_name
+
+def save_model_summary(model, model_path, model_name):
+    # Save summary.
+    summary = model.summary()
+    summary_file = open(model_path + f"{model_name}_summary.txt", 'w+')
+    summary_file.write(summary)
+    summary_file.close()
 
 def train_model():
     model = create_model()
 
-    #Using generators
-    history = fit_model_numpy(model)
+    #TensorBoard
+    tensorboard = TensorBoard(log_dir="logs/{}".format(time()));
 
-    model.save("model.h5")
-    plot_model_training(history)
+    history, score = fit_model_numpy(model, [tensorboard])
+
+    score_rounded = round(score[1], 2)
+    model_name = get_model_name(score_rounded)
+    model_path = "models/{}/".format(model_name)
+
+    print("New model saved in " + model_path)
+    create_model_folder(model_path)
+    model.save(model_path + model_name + ".h5")
+
+    save_model_graph(history, model_path, model_name)
+    save_model_summary(model, model_path, model_name)
+
 
 if __name__ == "__main__":
     train_model()
