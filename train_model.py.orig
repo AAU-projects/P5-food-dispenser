@@ -9,8 +9,11 @@ from keras.callbacks import TensorBoard
 from keras.models import Sequential
 from keras.layers import Conv2D, Activation, Dense, MaxPooling2D, Flatten, Dropout
 from keras.utils import np_utils
+<<<<<<< HEAD
 from decimal import Decimal
-from contextib import redirect_stdout
+=======
+from contextlib import redirect_stdout
+>>>>>>> 13275e4197965234c8d675158c612269917d5dde
 
 epoch_size = 2 # total number of runs
 batch_size = 16 # parts to split dataset into
@@ -91,7 +94,11 @@ def save_model_graph(history, model_path, model_name):
     plt.ylabel('Accuracy/Loss')
     plt.xlabel('Epoch')
     plt.legend(['Train_acc', 'Test_acc', "Train_loss", "Test_loss"], loc='upper left')
+<<<<<<< HEAD
+    plt.savefig(model_path + "graph_{}.png".format(model_name))
+=======
     plt.savefig(model_path + "{}_graph.png".format(model_name))
+>>>>>>> 13275e4197965234c8d675158c612269917d5dde
 
 def fit_model_generator(model):
     train_generator, validation_generator = retrieve_generators()
@@ -125,10 +132,17 @@ def get_model_name(score):
     return new_model_name
 
 def save_model_summary(model, model_path, model_name):
+<<<<<<< HEAD
     # Save summary.
+    summary = model.summary()
+    summary_file = open(model_path + f"{model_name}_summary.txt", 'w+')
+    summary_file.write(summary)
+    summary_file.close()
+=======
     with open(model_path + f"{model_name}_summary.txt", 'w') as f:
         with redirect_stdout(f):
             model.summary()
+>>>>>>> 13275e4197965234c8d675158c612269917d5dde
 
 def train_model():
     model = create_model()
@@ -138,7 +152,11 @@ def train_model():
 
     history, score = fit_model_numpy(model, [tensorboard])
 
+<<<<<<< HEAD
+    score_rounded = round(score[1], 2)
+=======
     score_rounded = f"{round(score[1], 3):.3f}"
+>>>>>>> 13275e4197965234c8d675158c612269917d5dde
     model_name = get_model_name(score_rounded)
     model_path = "models/{}/".format(model_name)
 
