@@ -5,3 +5,4 @@ __pycache__/*
 .vscode/*
 test_files/*
 *.h5
+*.rar

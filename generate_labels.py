@@ -1,4 +1,5 @@
 import os
+import sys
 import cv2
 import numpy as np
 from glob import glob
@@ -9,7 +10,6 @@ image_labels = ["cats", "dogs"]
 
 # Paths
 training_data_path= "data"
-training_folder = ["train", "validation"]
 
 # Image size convertion of training set
 img_width_height = (128, 128)
@@ -50,9 +50,14 @@ def load_images(foldertype):
     np.save(os.path.join(folder_path, "animals_" + foldertype), animals)
     np.save(os.path.join(folder_path, "labels_" + foldertype), labels)
 
-def generate_labels():
-    for i in range(0, len(training_folder)):
-        load_images(training_folder[i])
+def generate_labels(generate_folders):
+    for i in range(0, len(generate_folders)):
+        load_images(generate_folders[i])
         
 if __name__ == "__main__":
-    generate_labels()
+    generate_folders = []
+    for x in range(1, len(sys.argv)):
+        print(f"Generating for {sys.argv[x]}")
+        generate_folders.append(sys.argv[x])
+
+    generate_labels(generate_folders)

@@ -11,6 +11,7 @@ from keras.layers import Conv2D, Activation, Dense, MaxPooling2D, Flatten, Dropo
 from keras.utils import np_utils
 from decimal import Decimal
 from contextlib import redirect_stdout
+from eval_model import evaluate_model
 
 epoch_size = 2 # total number of runs
 batch_size = 16 # parts to split dataset into
@@ -103,7 +104,8 @@ def fit_model_generator(model):
 def fit_model_numpy(model, callbacks=None):
     animals_train, labels_train, animals_validation, labels_validation = retrive_dataset()
     history = model.fit(animals_train, labels_train, batch_size=batch_size, epochs=epoch_size, verbose=1, validation_data=(animals_validation, labels_validation),callbacks=callbacks)
-    score = model.evaluate(animals_validation, labels_validation, verbose=1)
+
+    score = evaluate_model(model)
     return history, score
 
 def create_model_folder(path):
