@@ -10,7 +10,7 @@ from keras.models import Sequential
 from keras.layers import Conv2D, Activation, Dense, MaxPooling2D, Flatten, Dropout
 from keras.utils import np_utils
 from decimal import Decimal
-from contextib import redirect_stdout
+from contextlib import redirect_stdout
 
 epoch_size = 2 # total number of runs
 batch_size = 16 # parts to split dataset into
