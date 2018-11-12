@@ -13,7 +13,7 @@ from decimal import Decimal
 from contextlib import redirect_stdout
 from eval_model import evaluate_model
 
-epoch_size = 1200 # total number of runs
+epoch_size = 2 # total number of runs
 batch_size = 64 # parts to split dataset into
 TRAIN_PATH = 'data/train'
 VALIDATION_PATH = 'data/validation'
@@ -171,8 +171,9 @@ def train_model():
     model = create_model()
 
     #TensorBoard
-    tensorboard = TensorBoard(log_dir="logs/{}".format(time()));
-    earlyStop = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='auto',restore_best_weights=True)
+    tensorboard_name = str(time())
+    tensorboard = TensorBoard(log_dir="logs/{}".format(tensorboard_name));
+    earlyStop = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='auto', restore_best_weights=True)
 
     history, score = fit_model_numpy(model, [tensorboard, earlyStop])
 
@@ -188,7 +189,14 @@ def train_model():
 
     save_model_graph(history, model_path, model_name)
     save_model_summary(model, model_path, model_name)
+    rename_model_log(tensorboard_name, model_name)
 
+def rename_model_log(tensorboard_name, model_name):
+    logpath = os.path.join(os.getcwd(),'logs', tensorboard_name)
+    newlogpath = os.path.join(os.getcwd(),'logs', model_name)
 
+    if os.path.exists(logpath):
+        os.rename(logpath, newlogpath)
+        
 if __name__ == "__main__":
     train_model()
