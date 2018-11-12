@@ -1,9 +1,8 @@
-import file_system 
-import graphs
-from image_processing import ImageProcessing
-from file_system import FileSystem
+from src.graphs import Graphs
+from src.image_processing import ImageProcessing
+from src.file_system import FileSystem
 from time import time
-from model_eval import ModelEval
+from src.model_evaluate import ModelEvaluate
 from keras.models import Sequential
 from keras.layers import Conv2D, Activation, Dense, MaxPooling2D, Flatten, Dropout
 from keras.callbacks import TensorBoard, EarlyStopping
@@ -56,11 +55,11 @@ class TrainModel:
         animals_train, labels_train, animals_validation, labels_validation = self.__retrive_dataset()
         history = model.fit(animals_train, labels_train, batch_size=self.batch_size, epochs=self.epoch_size, verbose=1, validation_data=(animals_validation, labels_validation), callbacks=callbacks)
 
-        score = ModelEval.evaluate_model(model)
+        score = ModelEvaluate.evaluate_model(model)
         return history, score
 
     def __retrive_dataset(self):
-        animals_train, labels_train, animals_validation, labels_validation = ImageProcessing.retrieve_train_validation(0.8)
+        animals_train, labels_train, animals_validation, labels_validation = ImageProcessing().retrieve_train_validation(procent_split=0.8)
 
         self.training_lenght = len(animals_train)
         self.validation_lenght = len(animals_validation)

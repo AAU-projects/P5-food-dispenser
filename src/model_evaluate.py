@@ -1,8 +1,8 @@
 ﻿import io
 import numpy as np
-from image_processing import ImageProcessing
+from src.image_processing import ImageProcessing
 
-class ModelEval:
+class ModelEvaluate:
     
     @classmethod
     def evaluate_model(self, model, score_print=True):
