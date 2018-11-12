@@ -62,28 +62,40 @@ class ImageProcessing:
     def retrieve_dataset(self, dataset_type, shuffle=True):
         dataset_path = os.path.join(os.getcwd(), 'data', dataset_type)
 
-        animals = np.load(os.path.join(
-            dataset_path, f"animals_{dataset_type}.npy"))
-        labels = np.load(os.path.join(
-            dataset_path, f"labels_{dataset_type}.npy"))
+        print("Loading animals")
+        animals_path = os.path.join(dataset_path, f"animals_{dataset_type}.npy")
+        animals = np.load(animals_path)
+
+        print("Loading labels")
+        labels_path = os.path.join(dataset_path, f"labels_{dataset_type}.npy")
+        labels = np.load(labels_path)
 
         if shuffle:
+            print("Shuffling")
             animals, labels = self.__shuffle(animals, labels)
 
+        print("Converting to floats")
         labels = animals.astype('float32')/255
         num_classes = len(self.image_labels)
 
         # One hot encoding
+        print("One hot encoding")
         labels = to_categorical(labels, num_classes)
         return animals, labels
 
     def retrieve_train_validation(self, shuffle=True, procent_split=0.9):
-        animals, labels = self.retrieve_dataset("dataset", shuffle)
+        animals, labels = self.retrieve_dataset(self.generate_folders[1], shuffle)
 
-        train_size = len(animals) * procent_split
+        train_size = int(len(animals) * procent_split)
+        print("Retriving")
+        animals_train = animals[0:train_size], 
+        labels_train = labels[0:train_size]
 
-        animals_train, labels_train = animals[0:train_size], labels[0:train_size]
-        animals_validation, labels_validation = animals[train_size:], labels[train_size:]
+        print("Validating retriving")
+        animals_validation = animals[train_size:], 
+        labels_validation = labels[train_size:]
+
+        print("Retrieved")
 
         return animals_train, labels_train, animals_validation, labels_validation
 

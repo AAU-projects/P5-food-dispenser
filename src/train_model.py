@@ -52,13 +52,13 @@ class TrainModel:
         return model  
 
     def __fit_model_numpy(self, model, callbacks=None):
-        animals_train, labels_train, animals_validation, labels_validation = self.__retrive_dataset()
-        history = model.fit(animals_train, labels_train, batch_size=self.batch_size, epochs=self.epoch_size, verbose=1, validation_data=(animals_validation, labels_validation), callbacks=callbacks)
+        animals_train, labels_train, animals_validation, labels_validation = self.__retrieve_dataset()
+        history = model.fit(animals_train, labels_train, batch_size=self.batch_size, epochs=self.epoch_size, verbose=1, callbacks=callbacks)
 
         score = ModelEvaluate.evaluate_model(model)
         return history, score
 
-    def __retrive_dataset(self):
+    def __retrieve_dataset(self):
         animals_train, labels_train, animals_validation, labels_validation = ImageProcessing().retrieve_train_validation(procent_split=0.8)
 
         self.training_lenght = len(animals_train)
@@ -84,12 +84,12 @@ class TrainModel:
 
         print("[LOG] New model saved in " + model_path)
         model.save(model_path + model_name + ".h5")
-        graphs.plot_model(history, model_path, model_name)
+        Graphs().plot_model(history, model_path, model_name)
         FileSystem.save_model_summary(model, model_path, model_name, self.activation_functions, 
                                         self.loss, self.optimizer, self.metrics, self.training_lenght, 
                                         self.validation_lenght)
         FileSystem.rename_model_log(tensorboard_name, model_name)
 
+
 if __name__ == "__main__":
-    tm = TrainModel()
-    tm.train_model()
+    TrainModel().train_model()
