@@ -12,45 +12,21 @@ from keras.utils import np_utils
 from decimal import Decimal
 from contextlib import redirect_stdout
 from eval_model import evaluate_model
+from src.image_processing import ImageProcessing 
 
-epoch_size = 2 # total number of runs
-batch_size = 64 # parts to split dataset into
-TRAIN_PATH = 'data/train'
-VALIDATION_PATH = 'data/validation'
 
-training_lenght = 0
-validation_lenght = 0
+"""
+    def retrieve_generator(self, path, **kwargs):
+        datagen = ImageDataGenerator(**kwargs)
+        generator = datagen.flow_from_directory(path, target_size=(img_width, img_height), batch_size=batch_size, class_mode='binary', shuffle=True)
+        return generator
 
-img_width, img_height = 128, 128
+    def retrieve_generators(self):
+        train_generator = retrieve_generator(self.TRAIN_PATH, rescale=1. / 255, shear_range=0.2, zoom_range=0.2, horizontal_flip=True)
+        validation_generator = retrieve_generator(self.VALIDATION_PATH, rescale=1. / 255)
 
-activation_functions = ['relu', 'relu', 'relu', 'relu', 'softmax']
-
-def create_model():    
-    model = Sequential()
-
-    model.add(Conv2D(32, (3, 3), input_shape=(img_width, img_height, 3)))
-    model.add(Activation(activation_functions[0]))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(32, (3, 3)))
-    model.add(Activation(activation_functions[1]))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(64, (3, 3)))
-    model.add(Activation(activation_functions[2]))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
-    model.add(Dense(64))
-    model.add(Activation(activation_functions[3]))
-    model.add(Dropout(0.5))
-    model.add(Dense(2))
-    model.add(Activation(activation_functions[4]))
-
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', 'binary_crossentropy'])
-    #model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
-
-    return model    
+        return train_generator, validation_generator
+"""
 
 def retrieve_generators():
     train_datagen = ImageDataGenerator(rescale=1. / 255, shear_range=0.2, zoom_range=0.2, horizontal_flip=True)
@@ -61,28 +37,9 @@ def retrieve_generators():
 
     return train_generator, validation_generator
 
-def shuffle(x, y):
-    shape = np.arange(x.shape[0])
-    np.random.shuffle(shape)
-    x = x[shape]
-    y = y[shape]
-    return x, y
-
 def retrive_dataset():
-    animals_train = np.load("data/train/animals_train.npy")
-    labels_train = np.load("data/train/labels_train.npy")
-    animals_train, labels_train = shuffle(animals_train, labels_train)
-    animals_train = animals_train.astype('float32')/255
-
-    animals_validation = np.load("data/validation/animals_validation.npy")
-    labels_validation = np.load("data/validation/labels_validation.npy")
-    animals_validation, labels_validation = shuffle(animals_validation, labels_validation)
-    animals_validation = animals_validation.astype('float32')/255
-
-    num_classes = 2
-    # One hot encoding
-    labels_train = keras.utils.to_categorical(labels_train, num_classes)
-    labels_validation = keras.utils.to_categorical(labels_validation,num_classes)
+    img_processing = ImageProcessing()
+    animals_train, labels_train, animals_validation, labels_validation = img_processing.retrieve_train_validation()
 
     global training_lenght
     global validation_lenght
