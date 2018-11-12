@@ -1,4 +1,9 @@
-import file_system
+import file_system 
+import graphs
+from image_processing import ImageProcessing
+from file_system import FileSystem
+from time import time
+from model_eval import ModelEval
 from keras.models import Sequential
 from keras.layers import Conv2D, Activation, Dense, MaxPooling2D, Flatten, Dropout
 from keras.callbacks import TensorBoard, EarlyStopping
@@ -14,14 +19,14 @@ class TrainModel:
         self.training_lenght = 0
         self.validation_lenght = 0
 
-        self.img_width, img_height = 128, 128
+        self.img_width, self.img_height = 128, 128
 
         self.activation_functions = ['relu', 'relu', 'relu', 'relu', 'softmax']
         self.loss = 'categorical_crossentropy'
         self.optimizer = 'adam'
-        self.metrics = ['accuracy', 'binary_crossentropy']
+        self.metrics = ['accuracy', 'categorical_crossentropy']
 
-    def create_model(self):    
+    def __create_model(self):    
         model = Sequential()
 
         model.add(Conv2D(32, (3, 3), input_shape=(self.img_width, self.img_height, 3)))
@@ -47,19 +52,15 @@ class TrainModel:
 
         return model  
 
-    def fit_model_numpy(self, model, callbacks=None):
-        animals_train, labels_train, animals_validation, labels_validation = self.retrive_dataset()
-        history = model.fit(animals_train, labels_train, batch_size=batch_size, epochs=epoch_size, verbose=1, validation_data=(animals_validation, labels_validation), callbacks=callbacks)
+    def __fit_model_numpy(self, model, callbacks=None):
+        animals_train, labels_train, animals_validation, labels_validation = self.__retrive_dataset()
+        history = model.fit(animals_train, labels_train, batch_size=self.batch_size, epochs=self.epoch_size, verbose=1, validation_data=(animals_validation, labels_validation), callbacks=callbacks)
 
-        score = evaluate_model(model)
+        score = ModelEval.evaluate_model(model)
         return history, score
 
-    def retrive_dataset(self):
-        global self.training_lenght
-        global self.validation_lenght
-
-        img_processing = ImageProcessing()
-        animals_train, labels_train, animals_validation, labels_validation = img_processing.retrieve_train_validation(0.8)
+    def __retrive_dataset(self):
+        animals_train, labels_train, animals_validation, labels_validation = ImageProcessing.retrieve_train_validation(0.8)
 
         self.training_lenght = len(animals_train)
         self.validation_lenght = len(animals_validation)
@@ -67,24 +68,29 @@ class TrainModel:
         return animals_train, labels_train, animals_validation, labels_validation
 
     def train_model(self):
-        model = self.create_model()
+        model = self.__create_model()
 
         #TensorBoard
         tensorboard_name = str(time())
         tensorboard = TensorBoard(log_dir="logs/{}".format(tensorboard_name));
         earlyStop = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='auto', restore_best_weights=True)
 
-        history, score = self.fit_model_numpy(model, [tensorboard, earlyStop])
+        history, score = self.__fit_model_numpy(model, [tensorboard, earlyStop])
 
-        plot_history([('model', history)])
+        #plot_history([('model', history)])
         score_rounded = f"{round(score[1], 3):.3f}"
-
-        file_system = FileSystem()        
-        model_name = file_system.get_model_name(score_rounded)
-        model_path = file_system.get_model_path(model_name)
+   
+        model_name = FileSystem.get_model_name(score_rounded, self.epoch_size, self.batch_size)
+        model_path = FileSystem.get_model_path(model_name)
 
         print("[LOG] New model saved in " + model_path)
         model.save(model_path + model_name + ".h5")
-        save_model_graph(history, model_path, model_name)
-        save_model_summary(model, model_path, model_name)
-        file_system.rename_model_log(tensorboard_name, model_name)
+        graphs.plot_model(history, model_path, model_name)
+        FileSystem.save_model_summary(model, model_path, model_name, self.activation_functions, 
+                                        self.loss, self.optimizer, self.metrics, self.training_lenght, 
+                                        self.validation_lenght)
+        FileSystem.rename_model_log(tensorboard_name, model_name)
+
+if __name__ == "__main__":
+    tm = TrainModel()
+    tm.train_model()

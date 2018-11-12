@@ -74,7 +74,7 @@ class ImageProcessing:
         return animals, labels
 
     def retrieve_train_validation(self, shuffle=True, procent_split=0.9):
-        animals, labels = retrieve_dataset("train", shuffle)
+        animals, labels = self.retrieve_dataset(self.generate_folders[1], shuffle)
 
         train_size = len(animals) * procent_split
 

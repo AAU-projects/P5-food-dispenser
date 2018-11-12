@@ -2,9 +2,9 @@
 import numpy as np
 from image_processing import ImageProcessing
 
-
 class ModelEval:
     
+    @classmethod
     def evaluate_model(self, model, score_print=True):
         img_processing = ImageProcessing()
         data, labels = img_processing.retrieve_dataset("test")
