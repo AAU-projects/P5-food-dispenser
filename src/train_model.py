@@ -1,8 +1,8 @@
-from src.graphs import Graphs
-from src.image_processing import ImageProcessing
-from src.file_system import FileSystem
+from graphs import Graphs
+from image_processing import ImageProcessing
+from file_system import FileSystem
 from time import time
-from src.model_evaluate import ModelEvaluate
+from model_evaluate import ModelEvaluate
 from keras.models import Sequential
 from keras.layers import Conv2D, Activation, Dense, MaxPooling2D, Flatten, Dropout
 from keras.callbacks import TensorBoard, EarlyStopping

@@ -1,4 +1,4 @@
-from src.train_model import TrainModel
+from train_model import TrainModel
 
 if __name__ == "__main__":
     tm = TrainModel()
