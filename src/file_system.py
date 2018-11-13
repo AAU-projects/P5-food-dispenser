@@ -53,6 +53,6 @@ class FileSystem:
     # Creates model directory and returns the path.
     @classmethod
     def get_model_path(cls, model_name):
-        path = os.path.join(os.getcwd(), "models", model_name)
+        path = os.path.join(os.getcwd(), "models", model_name) + '/'
         cls.create_model_folder(path)
         return path
