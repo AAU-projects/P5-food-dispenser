@@ -64,10 +64,12 @@ class ImageProcessing:
 
         print("Loading animals")
         animals_path = os.path.join(dataset_path, f"animals_{dataset_type}.npy")
+        print(animals_path)
         animals = np.load(animals_path)
 
         print("Loading labels")
         labels_path = os.path.join(dataset_path, f"labels_{dataset_type}.npy")
+        print(labels_path)
         labels = np.load(labels_path)
 
         if shuffle:
@@ -79,8 +81,8 @@ class ImageProcessing:
         num_classes = len(self.image_labels)
 
         # One hot encoding
-        print("One hot encoding")
-        labels = to_categorical(labels, num_classes)
+        #print("One hot encoding")
+        #labels = to_categorical(labels, num_classes)
         return animals, labels
 
     def retrieve_train_validation(self, shuffle=True, procent_split=0.9):

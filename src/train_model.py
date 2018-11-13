@@ -7,7 +7,6 @@ from keras.models import Sequential
 from keras.layers import Conv2D, Activation, Dense, MaxPooling2D, Flatten, Dropout
 from keras.callbacks import TensorBoard, EarlyStopping
 
-
 class TrainModel:
     def __init__(self, *args, **kwargs):
         self.epoch_size = 2 # total number of runs
@@ -59,7 +58,8 @@ class TrainModel:
         return history, score
 
     def __retrieve_dataset(self):
-        animals_train, labels_train, animals_validation, labels_validation = ImageProcessing().retrieve_train_validation(procent_split=0.8)
+        ip = ImageProcessing()
+        animals_train, labels_train, animals_validation, labels_validation = ip.retrieve_train_validation(procent_split=0.8)
 
         self.training_lenght = len(animals_train)
         self.validation_lenght = len(animals_validation)
