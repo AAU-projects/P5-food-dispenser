@@ -3,11 +3,9 @@ import numpy as np
 from src.image_processing import ImageProcessing
 
 class ModelEvaluate:
-    
-    @classmethod
     def evaluate_model(self, model, score_print=True):
         img_processing = ImageProcessing()
-        data, labels = img_processing.retrieve_dataset("test")
+        data, labels = img_processing.retrive_dataset_test()
         score = model.evaluate(data, labels, verbose=1)
         if(score_print):
             self.__print_score(score[1])
