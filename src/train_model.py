@@ -55,7 +55,7 @@ class TrainModel:
         return model  
 
     def __fit_model_numpy(self, model, callbacks=None):
-        animals_train, labels_train, animals_validation, labels_validation = self.ip.retrieve_train_validation()
+        animals_train, labels_train, animals_validation, labels_validation = self.__retrieve_dataset()
         history = model.fit(animals_train, labels_train, batch_size=self.batch_size, epochs=self.epoch_size, verbose=1, validation_data=(animals_validation, labels_validation), callbacks=callbacks)
 
         score = self.eval.evaluate_model(model)
