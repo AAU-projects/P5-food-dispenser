@@ -4,7 +4,7 @@ from src.image_processing import ImageProcessing
 
 if __name__ == "__main__":
     if not os.path.exists(os.path.join(os.getcwd(), 'data', 'dataset', 'animals_dataset.npy')):
-        print("Missing numpy arrays, generating now")
+        print("[LOG] No npy files found... Generating")
         ImageProcessing().generate_labels()
 
     tm = TrainModel()
