@@ -4,7 +4,8 @@ from src.file_system import FileSystem
 from src.model_evaluate import ModelEvaluate
 from time import time
 from keras.models import Sequential
-from keras.layers import Conv2D, Activation, Dense, MaxPooling2D, Flatten, Dropout
+from keras.optimizers import SGD
+from keras.layers import Conv2D, Activation, Dense, MaxPooling2D, Flatten, Dropout, BatchNormalization
 from keras.callbacks import TensorBoard, EarlyStopping
 
 class TrainModel:
@@ -12,9 +13,10 @@ class TrainModel:
         self.ip = ImageProcessing()
         self.eval = ModelEvaluate()
 
-        
-        self.epoch_size = 2 # total number of runs
-        self.batch_size = 64 # parts to split dataset into
+        self.epoch_size = 50 # total number of runs
+        self.batch_size = 128 # parts to split dataset into
+        self.dataset_split_percentage = 0.6
+        self.number_of_classes = 2
         self.TRAIN_PATH = 'data/train'
         self.VALIDATION_PATH = 'data/validation'
 
@@ -23,7 +25,7 @@ class TrainModel:
 
         self.img_width, self.img_height = 128, 128
 
-        self.activation_functions = ['relu', 'relu', 'relu', 'relu', 'softmax']
+        self.activation_functions = ['relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'softmax']
         self.loss = 'categorical_crossentropy'
         self.optimizer = 'adam'
         self.metrics = ['accuracy', 'categorical_crossentropy']
@@ -32,23 +34,51 @@ class TrainModel:
         model = Sequential()
 
         model.add(Conv2D(32, (3, 3), input_shape=(self.img_width, self.img_height, 3)))
+        model.add(BatchNormalization())
         model.add(Activation(self.activation_functions[0]))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
         model.add(Conv2D(32, (3, 3)))
+        model.add(BatchNormalization())
         model.add(Activation(self.activation_functions[1]))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
-        model.add(Conv2D(64, (3, 3)))
+        model.add(Conv2D(32, (3, 3)))
+        model.add(BatchNormalization())
         model.add(Activation(self.activation_functions[2]))
+        model.add(Conv2D(32, (3, 3)))
+        model.add(BatchNormalization())
+        model.add(Activation(self.activation_functions[3]))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(32, (3, 3)))
+        model.add(BatchNormalization())
+        model.add(Activation(self.activation_functions[4]))
+        model.add(Conv2D(32, (3, 3)))
+        model.add(BatchNormalization())
+        model.add(Activation(self.activation_functions[5]))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(32, (3, 3)))
+        model.add(BatchNormalization())
+        model.add(Activation(self.activation_functions[6]))
+        model.add(Conv2D(32, (3, 3)))
+        model.add(BatchNormalization())
+        model.add(Activation(self.activation_functions[7]))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(16, (2, 2)))
+        model.add(BatchNormalization())
+        model.add(Activation(self.activation_functions[8]))
+        model.add(Conv2D(16, (2, 2)))
+        model.add(BatchNormalization())
+        model.add(Activation(self.activation_functions[9]))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
         model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
         model.add(Dense(64))
-        model.add(Activation(self.activation_functions[3]))
-        model.add(Dropout(0.5))
-        model.add(Dense(2))
-        model.add(Activation(self.activation_functions[4]))
+        model.add(Activation(self.activation_functions[10]))
+        #model.add(Dropout(0.5))    # Replaced by BatchNormalization layers. 
+        model.add(Dense(self.number_of_classes))
+        model.add(Activation(self.activation_functions[11]))
 
         model.compile(loss=self.loss, optimizer=self.optimizer, metrics=self.metrics)
 
@@ -62,7 +92,7 @@ class TrainModel:
         return history, score
 
     def __retrieve_dataset(self):
-        animals_train, labels_train, animals_validation, labels_validation = self.ip.retrieve_train_validation(procent_split=0.8)
+        animals_train, labels_train, animals_validation, labels_validation = self.ip.retrieve_train_validation(procent_split=self.dataset_split_percentage)
 
         self.training_lenght = len(animals_train)
         self.validation_lenght = len(animals_validation)
@@ -75,7 +105,7 @@ class TrainModel:
         #TensorBoard
         tensorboard_name = str(time())
         tensorboard = TensorBoard(log_dir="logs/{}".format(tensorboard_name));
-        earlyStop = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=1, mode='auto', restore_best_weights=True)
+        earlyStop = EarlyStopping(monitor='val_loss', min_delta=0, patience=20, verbose=1, mode='auto', restore_best_weights=True)
 
         history, score = self.__fit_model_numpy(model, [tensorboard, earlyStop])
 
