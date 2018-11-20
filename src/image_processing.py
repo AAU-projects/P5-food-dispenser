@@ -13,7 +13,7 @@ class ImageProcessing:
         self.image_labels = ["cats", "dogs"]
         self.training_data_path = "data"
         self.img_width_height = (128, 128)
-        self.generate_folders = ['test', 'dataset']
+        self.generate_folders = ['dataset', 'test']
 
     def __load_image(self, filepath):
         img = cv2.imread(filepath)
