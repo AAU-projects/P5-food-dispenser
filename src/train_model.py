@@ -1,3 +1,4 @@
+import inspect
 from src.graphs import Graphs
 from src.image_processing import ImageProcessing
 from src.file_system import FileSystem
@@ -13,9 +14,9 @@ class TrainModel:
         self.ip = ImageProcessing()
         self.eval = ModelEvaluate()
 
-        self.epoch_size = 50 # total number of runs
+        self.epoch_size = 2 # total number of runs
         self.batch_size = 128 # parts to split dataset into
-        self.dataset_split_percentage = 0.6
+        self.dataset_split_percentage = 0.9
         self.number_of_classes = 2
         self.TRAIN_PATH = 'data/train'
         self.VALIDATION_PATH = 'data/validation'
@@ -25,62 +26,33 @@ class TrainModel:
 
         self.img_width, self.img_height = 128, 128
 
-        self.activation_functions = ['relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'relu', 'softmax']
-        self.loss = 'categorical_crossentropy'
-        self.optimizer = 'adam'
-        self.metrics = ['accuracy', 'categorical_crossentropy']
-
     def __create_model(self):    
         model = Sequential()
 
-        model.add(Conv2D(32, (3, 3), input_shape=(self.img_width, self.img_height, 3)))
+        model.add(Conv2D(32, (3, 3), input_shape=(self.img_width, self.img_height, 3), activation='relu'))
         model.add(BatchNormalization())
-        model.add(Activation(self.activation_functions[0]))
-        model.add(Conv2D(32, (3, 3)))
+        model.add(Conv2D(32, (3, 3), activation='relu'))
         model.add(BatchNormalization())
-        model.add(Activation(self.activation_functions[1]))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
-        model.add(Conv2D(32, (3, 3)))
+        model.add(Conv2D(32, (3, 3), activation='relu'))
         model.add(BatchNormalization())
-        model.add(Activation(self.activation_functions[2]))
-        model.add(Conv2D(32, (3, 3)))
+        model.add(Conv2D(32, (3, 3), activation='relu'))
         model.add(BatchNormalization())
-        model.add(Activation(self.activation_functions[3]))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
-        model.add(Conv2D(32, (3, 3)))
+        model.add(Conv2D(32, (3, 3), activation='relu'))
         model.add(BatchNormalization())
-        model.add(Activation(self.activation_functions[4]))
-        model.add(Conv2D(32, (3, 3)))
+        model.add(Conv2D(32, (3, 3), activation='relu'))
         model.add(BatchNormalization())
-        model.add(Activation(self.activation_functions[5]))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
-        model.add(Conv2D(32, (3, 3)))
-        model.add(BatchNormalization())
-        model.add(Activation(self.activation_functions[6]))
-        model.add(Conv2D(32, (3, 3)))
-        model.add(BatchNormalization())
-        model.add(Activation(self.activation_functions[7]))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
-        model.add(Conv2D(16, (2, 2)))
-        model.add(BatchNormalization())
-        model.add(Activation(self.activation_functions[8]))
-        model.add(Conv2D(16, (2, 2)))
-        model.add(BatchNormalization())
-        model.add(Activation(self.activation_functions[9]))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
         model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
-        model.add(Dense(64))
-        model.add(Activation(self.activation_functions[10]))
-        #model.add(Dropout(0.5))    # Replaced by BatchNormalization layers. 
-        model.add(Dense(self.number_of_classes))
-        model.add(Activation(self.activation_functions[11]))
+        model.add(Dense(64, activation='sigmoid'))
+        model.add(Dropout(0.5))    # Replaced by BatchNormalization layers. 
+        model.add(Dense(self.number_of_classes, activation='softmax'))
 
-        model.compile(loss=self.loss, optimizer=self.optimizer, metrics=self.metrics)
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', 'categorical_crossentropy'])
 
         return model  
 
@@ -117,9 +89,13 @@ class TrainModel:
         print("[LOG] New model saved in " + model_path)
         model.save(model_path + model_name + ".h5")
         Graphs().plot_model(history, model_path, model_name)
-        FileSystem.save_model_summary(model, model_path, model_name, self.activation_functions, 
-                                        self.loss, self.optimizer, self.metrics, self.training_lenght, 
+
+        # Saves model
+        lines = inspect.getsource(self.__create_model)
+        FileSystem.save_model_summary(lines, model_path, model_name, self.training_lenght, 
                                         self.validation_lenght)
+
+        # Renames model log
         FileSystem.rename_model_log(tensorboard_name, model_name)
 
 
