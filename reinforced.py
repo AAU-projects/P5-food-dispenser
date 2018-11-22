@@ -2,6 +2,15 @@ from keras import Sequential
 from keras.layers import Dense
 
 
+'''
+INPUT:
+    [0] - Model predicted that the image was of a cat
+    [1] - Model predicted that the image was of a dog
+    
+OUTPUT:
+    [0] - Agent has predicted that the desired function is to feed the cat
+    [1] - Agent has predicted that the desired function is to feed the dog
+'''
 # https://keon.io/deep-q-learning/
 # http://adventuresinmachinelearning.com/reinforcement-learning-tutorial-python-keras/
 class DispenseAgent:
