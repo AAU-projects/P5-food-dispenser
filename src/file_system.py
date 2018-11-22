@@ -32,21 +32,11 @@ class FileSystem:
         return new_model_name
 
     @classmethod
-    def save_model_summary(cls, model, model_path, model_name, 
-                            activation_functions, loss, optimizer, 
-                            metrics, training_lenght, validation_lenght):
+    def save_model_summary(cls, model, model_path, model_name, training_lenght, validation_lenght):
         # Save summary.
         with open(model_path + f"{model_name}_summary.txt", 'w') as f:
-            with redirect_stdout(f):
-                model.summary()
+            f.write(model)
                 
-            for x in range(0, len(activation_functions)):
-                f.write(f"activation_{x + 1} = {activation_functions[x]}\n")
-
-            f.write(f"\nOptimizer: {optimizer}\n")    
-            f.write(f"Loss: {loss}\n")    
-            f.write(f"Metrics: {metrics}\n\n")    
-
             f.write(f"Train_size: {training_lenght}\n")
             f.write(f"Validation_size: {validation_lenght}\n")
 
