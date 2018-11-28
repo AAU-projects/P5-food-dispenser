@@ -43,7 +43,11 @@ class DispenseAgent:
 
     def act(self, state):
         if np.random.rand() <= self.epsilon:
-            return random.randint(0, 1)
+            return random.randrange(self.action_size)
+        act_values = self.model.predict(state)
+        return np.argmax(act_values[0])  # returns action
+
+    def predict(self, state):
         act_values = self.model.predict(state)
         return np.argmax(act_values[0])  # returns action
 
@@ -86,11 +90,6 @@ class FoodDispenser:
 
         self.done = False
 
-        return [self.predict, self.bowl_rotation, self.dispense_rotation]
-
-    def predict_functions(self, predict):
-        self.reset()
-        self.predict = predict
         return [self.predict, self.bowl_rotation, self.dispense_rotation]
 
     def rotate_bowl(self, action):
@@ -143,12 +142,12 @@ class FoodDispenser:
         return [self.predict, self.bowl_rotation, self.dispense_rotation], self.reward, self.done
 
 EPISODES = 1000
-
 if __name__ == "__main__":
     env = FoodDispenser()
     state_size = env.state_size
     action_size = env.action_size
     agent = DispenseAgent(state_size, action_size)
+    #agent.load("food_dispenser.h5")
     done = False
     batch_size = 32
 
@@ -159,188 +158,21 @@ if __name__ == "__main__":
             action = agent.act(state)
             next_state, reward, done = env.step(action)
 
-            reward = reward if done else -1
+            #reward = reward if done else -1
 
             next_state = np.reshape(next_state, [1, state_size])
             agent.remember(state, action, reward, next_state, done)
             state = next_state
-            
+
+            # Done becomes True when no more steps 
+            # The agent drops the pole
             if done:
                 print("episode: {}/{}, score: {}, e: {:.2}, step {}"
-                      .format(e + 1, EPISODES, reward, agent.epsilon, step))
+                        .format(e + 1, EPISODES, reward, agent.epsilon, step))
                 break
+            # train the agent with the experience of the episode
             if len(agent.memory) > batch_size:
                 agent.replay(batch_size)
-                # Logging training loss for every step
-                print("episode: {}/{}, step: {}"
-                        .format(e + 1, EPISODES, step))  
-
+                
+    print('Saving model')
     agent.save("food_dispenser.h5")   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
