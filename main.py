@@ -24,22 +24,21 @@ DOG = 1
 
 BRICK = nxt.locator.find_one_brick()
 
-
 def main():
-	oldDist = Ultrasonic(BRICK, ULTRASONICPORT).get_sample()
+	oldDist = get_range()
 	running = True
-	print("Starting while loop")
 	while running:
-		print("Inside while loop")
-		newDist = Ultrasonic(BRICK, ULTRASONICPORT).get_sample()
+		print_console("Waiting for movement...")
+		newDist = get_range()
 
 		if newDist != oldDist:
 			oldDist = newDist
 			
+			print_console("Taking pictures")
 			take_pictures_CV2(DIRECTORY)
-			print("Pics taken")
 
-			# send pictures to ML
+			# Pictures analyzed ML
+			print_console("Predicting from pictures")
 			result = predict_folder(DIRECTORY)
 			
 			# do something based on ML respond
@@ -51,6 +50,8 @@ def main():
 			change_bowl_pos()
 			turn_gate()
 			
+def print_console(input):
+	print("[INFO] {}".format(input))
 
 def dispense_food(animal):
 	if BOWLROT != animal:
@@ -74,9 +75,9 @@ def wait_and_close():
 	count = 0
 	
 	while(not done):
-		oldDist = Ultrasonic(BRICK, ULTRASONICPORT).get_sample()
+		oldDist = get_range()
 		sleep(2)
-		newDist = Ultrasonic(BRICK, ULTRASONICPORT).get_sample()
+		newDist = get_range()
 		
 		if oldDist == newDist:
 			count += 1
@@ -101,9 +102,6 @@ def open_containers(animal):
     sleep(1)
     turn_moter(BOWLPORT, 45, 90)
   bowl_backward_small()
-    
-  
-
 
 def rotate_bowl():
 	# Rotate the bowl 180 by moving it back and forward to make sure we dont dispense the food prematurely.
@@ -115,8 +113,8 @@ def rotate_bowl():
   bowl_forward_small()
   turn_motor(BOWLPORT, -45, 50)
 
-
 def change_bowl_pos():
+	print_console("Moving bowl")
 	global BOWLPOS
 	#  Drive bowl in and out
 	if BOWLPOS == 0:
@@ -126,8 +124,8 @@ def change_bowl_pos():
 		turn_motor(MOTORPORT, -45, 350)
 		BOWLPOS = 0
 
-
 def turn_gate():
+	print_console("Turning gate")
 	global GATEPOS
 	if GATEPOS == 0:
 		turn_motor(GATEPORT, 45, 630)
@@ -136,10 +134,12 @@ def turn_gate():
 		turn_motor(GATEPORT, -45, 630)
 		GATEPOS = 0
 
-
 def turn_motor(port, speed, range):
 	motor = Motor(BRICK, port)
 	motor.turn(int(speed * MOTORSPEED), range)
+
+def get_range():
+	return Ultrasonic(BRICK, ULTRASONICPORT).get_sample()
 
 if __name__ == "__main__":
 	main()
