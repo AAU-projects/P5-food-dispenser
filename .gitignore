@@ -1,6 +1,7 @@
 data/*
 models/*
 */__pycache__/*
+__pycache__/*
 .vs/*
 .vscode/*
 test_files/*
@@ -9,3 +10,4 @@ test_files/*
 venv/*
 .idea/*
 ralle/*
+new data/*
