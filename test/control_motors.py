@@ -2,13 +2,13 @@ import nxt.locator
 from nxt.motor import *
 from nxt.sensor import *
 
-MOTORSPEED = 20
+MOTORSPEED = 35
 STEPSIZE = 90
 BRICK = nxt.locator.find_one_brick()
 
 def control_loop():
     while(True):
-        text = input("cmds: opengate, closegate, bowlin, bowlout, rotbowlf, rotbowlt, portcharT/B:")
+        text = input("cmds: opengate, closegate, bowlin, bowlout, rotbowlf, rotbowlt, portcharT/B:\n")
         
         if(text == "opengate"):
             turn_gate(False)

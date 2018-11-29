@@ -24,20 +24,23 @@ def get_animal_name(score):
     print(score[0])
     if score[0][0] > 0.8:
         return 0
-    if score[0][0] < 0.2:
+    if score[0][1] > 0.8:
         return 1
+    if score[0][2] > 0.8:
+        return 2
     return -1
 
 
 def predict_animal(file, model):
     ar = convert_to_array(file)
     ar = ar/255
-    label = 1
     a = []
     a.append(ar)
     a = np.array(a)
-    score = model.predict(a, verbose=1)
+    score = model.predict(a, verbose=0)
     acc = np.max(score)
+    for x in range(0, 3):
+      print(round(score[0][x],10))
     return get_animal_name(score)
 
 
