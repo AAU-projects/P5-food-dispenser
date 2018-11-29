@@ -19,6 +19,9 @@ GATEPORT = PORT_C
 GATEPOS = 0	 # 0 = closed, 1 = open
 MOTORSPEED = 0.5
 
+CAT = 0
+DOG = 1
+
 BRICK = nxt.locator.find_one_brick()
 
 
@@ -43,7 +46,10 @@ def main():
 			dispense_food(result)
 			
 			#Wait for the animal to finish, then close
-			wait_and_close()
+			#wait_and_close()
+			time.sleep(2)
+			change_bowl_pos()
+			turn_gate()
 			
 
 def dispense_food(animal):
@@ -51,10 +57,17 @@ def dispense_food(animal):
 		rotate_bowl()
 		
 	# dispense food
-	open_containers()
-	# give cat food
+	open_containers(animal)
+	# Open gate
 	turn_gate()
+  # Push bowl out
 	change_bowl_pos()
+ 
+def bowl_forward_small():
+  turn_motor(MOTORPORT, 45, 20)
+  
+def bowl_backward_small():
+  turn_motor(MOTORPORT, -45, 20)
 	
 def wait_and_close():
 	done = 0
@@ -68,6 +81,8 @@ def wait_and_close():
 		if oldDist == newDist:
 			count += 1
 			print("WaitCount: " + str(count))
+		else:
+			count = 0
 		
 		if count >= 3:
 			done = 1
@@ -75,13 +90,30 @@ def wait_and_close():
 	change_bowl_pos()
 	turn_gate()
 
-def open_containers():
-	pass
+def open_containers(animal):
+  bowl_forward_small()
+  if(animal == CAT):
+    turn_motor(BOWLPORT, 45, 90)
+    sleep(1)
+    turn_motor(BOWLPORT, -45, 90)
+  else:
+    turn_motor(BOWLPORT, -45, 90)
+    sleep(1)
+    turn_moter(BOWLPORT, 45, 90)
+  bowl_backward_small()
+    
+  
 
 
 def rotate_bowl():
-	# Rotate the bowl 180
-	turn_motor(BOWLPORT, -45, 350)
+	# Rotate the bowl 180 by moving it back and forward to make sure we dont dispense the food prematurely.
+  turn_motor(BOWLPORT, 45, 50)
+  bowl_forward_small()
+  turn_motor(BOWLPORT, -45, 50)
+  bowl_backward_small()
+  turn_motor(BOWLPORT, 45, 50)
+  bowl_forward_small()
+  turn_motor(BOWLPORT, -45, 50)
 
 
 def change_bowl_pos():

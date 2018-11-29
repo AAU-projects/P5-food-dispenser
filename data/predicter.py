@@ -7,15 +7,17 @@ import numpy as np
 import argparse
 import time
 import sys
+import cv2
 import glob
 
-img_width, img_height = 100, 100
 model = load_model('model/model.h5')
 
 def convert_to_array(img):
-    image = np.array(Image.open(img), dtype=np.uint8)
-    img_from_ar = Image.fromarray(image, 'RGB')
-    resized_image = img_from_ar.resize((img_width, img_height))
+    
+    img = cv2.imread(img)
+    img_from_ar = Image.fromarray(img, 'RGB')
+    resized_image = img_from_ar.resize((128, 128))
+
     return np.array(resized_image)
 
 def get_animal_name(score):
