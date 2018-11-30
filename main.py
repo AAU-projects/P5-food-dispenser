@@ -4,7 +4,7 @@ import os
 import nxt.locator
 import random
 import numpy as np
-
+import warnings
 from nxt.sensor import *
 from nxt.motor import *
 from data.picture import take_pictures_CV2
@@ -28,6 +28,10 @@ DOG = 1
 JUNK = 2
 
 BRICK = nxt.locator.find_one_brick()
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    fxn()
 
 def main():
 	oldDist = get_range()
@@ -62,7 +66,10 @@ def main():
 					rotate_bowl()
 			else:
 				print("Junk")
-			
+
+def fxn():
+    warnings.warn("deprecated", DeprecationWarning)
+
 def print_console(input):
 	print("[INFO] {}".format(input))
 
