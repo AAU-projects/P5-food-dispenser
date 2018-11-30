@@ -45,6 +45,7 @@ def main():
 			# Pictures analyzed ML
 			print_console("Predicting from pictures")
 			result = predict_folder(DIRECTORY)
+			result = CAT
 			print(result)
 			
 			if not (result == -1 or result == 2):
@@ -56,6 +57,9 @@ def main():
 				time.sleep(2)
 				change_bowl_pos()
 				turn_gate()
+				
+				if result == CAT:
+					rotate_bowl()
 			else:
 				print("Junk")
 			
@@ -63,13 +67,19 @@ def print_console(input):
 	print("[INFO] {}".format(input))
 
 def dispense_food(animal):
-
 	rl_dispense_food(animal)
-		
 
+	#Rotate the bowl if it is not in the correct position
+	if BOWLROT != animal:
+		rotate_bowl()
+		
+	# dispense food
+	open_containers(animal)
+	#Rotate the bowl so the right side faces outward to the animal
+	rotate_bowl()
 	# Open gate
 	turn_gate()
-  # Push bowl out
+	# Push bowl out
 	change_bowl_pos()
 
 def bowl_forward_small():
@@ -100,6 +110,7 @@ def wait_and_close():
 	turn_gate()
 
 def open_containers(animal):
+  bowl_forward_small()
   if(animal == CAT):
     turn_motor(BOWLPORT, 45, 90)
     sleep(1)
@@ -119,6 +130,10 @@ def rotate_bowl():
   turn_motor(BOWLPORT, 45, 50)
   bowl_forward_small()
   turn_motor(BOWLPORT, -45, 50)
+  bowl_backward_small()
+  
+  global BOWLROT 
+  BOWLROT = not BOWLROT
 
 def change_bowl_pos():
 	print_console("Moving bowl")
