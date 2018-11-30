@@ -29,6 +29,10 @@ JUNK = 2
 
 BRICK = nxt.locator.find_one_brick()
 
+# Setup agent
+agent = DispenseAgent(1, 2)
+agent.load("food_dispenser.h5")
+
 def main():
 	oldDist = get_range()
 	running = True
@@ -60,6 +64,8 @@ def main():
 				
 				if result == CAT:
 					rotate_bowl()
+			
+				NEXT_STATE = 0
 			else:
 				print("Junk")
 			
@@ -150,22 +156,16 @@ def turn_motor(port, speed, range):
 def get_range():
 	return Ultrasonic(BRICK, ULTRASONICPORT).get_sample()
 
-def get_action(animal, agent):
+def get_action(animal):
     state = np.reshape(animal, [1, 1])
     action = agent.predict(state)
     return action
 
 def rl_dispense_food(animal):
-	# Setup enviroment
-
-	# Setup agent
-	agent = DispenseAgent(1, 2)
-	agent.load("food_dispenser.h5")
-
-	action = get_action(animal, agent)
+	action = get_action(animal)
 	enviroment_step(action)
 
-	action = get_action(animal, agent)
+	action = get_action(animal)
 	enviroment_step(action)
 
 	#Rotate the bowl so the right side faces outward to the animal
@@ -176,6 +176,8 @@ def rl_dispense_food(animal):
 	
 	# Push bowl out
 	change_bowl_pos()
+ 
+ 
 
 
 def enviroment_step(action):
