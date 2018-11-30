@@ -46,6 +46,7 @@ def main():
 
 		if abs(newDist - oldDist) > 5:
 			oldDist = newDist
+			result = -1
 			
 			while True:
 				try:
