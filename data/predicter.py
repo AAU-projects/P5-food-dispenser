@@ -13,7 +13,6 @@ import glob
 model = load_model('model/model.h5')
 
 def convert_to_array(img):
-    
     img = cv2.imread(img)
     img_from_ar = Image.fromarray(img, 'RGB')
     resized_image = img_from_ar.resize((128, 128))

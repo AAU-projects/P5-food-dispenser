@@ -43,14 +43,18 @@ def main():
 		if abs(newDist - oldDist) > 5:
 			oldDist = newDist
 			
-			print_console("Taking pictures")
-			take_pictures_CV2(DIRECTORY)
-
-			# Pictures analyzed ML
-			print_console("Predicting from pictures")
-			result = predict_folder(DIRECTORY)
-			result = CAT
-			print(result)
+			while True:
+				try:
+					print_console("Taking pictures")
+					take_pictures_CV2(DIRECTORY)
+					# Pictures analyzed ML
+					print_console("Predicting from pictures")
+					result = predict_folder(DIRECTORY)
+					result = CAT
+					print(result)
+					break
+				except Exception:
+					print("[ERROR] image capture fail")
 			
 			if not (result == -1 or result == 2):
 				# do something based on ML respond
