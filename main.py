@@ -12,6 +12,7 @@ from data.predicter import predict_folder
 from time import sleep
 from rl_agent_env import DispenseAgent, FoodDispenser
 
+
 ULTRASONICPORT = PORT_1
 DIRECTORY = os.path.join(os.getcwd(), "pictures")
 BOWLPOS = 0	 # 0 = in, 1 = out
@@ -33,10 +34,6 @@ BRICK = nxt.locator.find_one_brick()
 agent = DispenseAgent(1, 2)
 agent.load("food_dispenser.h5")
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    fxn()
-
 def main():
 	oldDist = get_range()
 	running = True
@@ -53,7 +50,7 @@ def main():
 			# Pictures analyzed ML
 			print_console("Predicting from pictures")
 			result = predict_folder(DIRECTORY)
-			result = CAT
+			#result = CAT
 			print(result)
 			
 			if not (result == -1 or result == 2):
@@ -72,9 +69,6 @@ def main():
 				NEXT_STATE = 0
 			else:
 				print("Junk")
-
-def fxn():
-    warnings.warn("deprecated", DeprecationWarning)
 
 def print_console(input):
 	print("[INFO] {}".format(input))
