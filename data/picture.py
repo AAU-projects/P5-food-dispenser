@@ -17,13 +17,18 @@ def delete_all_files(destination):
 
 def take_pictures_CV2(destination, number_of_images=1):
 	delete_all_files(destination)
-	
-	capture = cv2.VideoCapture(WEBCAM)
-	for x in range(0, number_of_images):
-		ret, frame = capture.read()
-		cv2.imwrite(os.path.join(destination, str(x)+".png"), frame)
-		sleep(1)
-	capture.release()
+	while True:
+		try:
+			capture = cv2.VideoCapture(WEBCAM)
+			for x in range(0, number_of_images):
+				ret, frame = capture.read()
+				cv2.imwrite(os.path.join(destination, str(x)+".png"), frame)
+				sleep(1)
+			capture.release()
+			break
+		except Exception:
+			print("[ERROR] image capture fail")
+			capture.release()
 
 def take_pictures_digital(destination, cats_dogs_destination):
 	delete_all_files(destination)

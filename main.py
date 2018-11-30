@@ -4,7 +4,7 @@ import os
 import nxt.locator
 import random
 import numpy as np
-
+import warnings
 from nxt.sensor import *
 from nxt.motor import *
 from data.picture import take_pictures_CV2
@@ -32,6 +32,10 @@ BRICK = nxt.locator.find_one_brick()
 # Setup agent
 agent = DispenseAgent(1, 2)
 agent.load("food_dispenser.h5")
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    fxn()
 
 def main():
 	oldDist = get_range()
@@ -68,7 +72,10 @@ def main():
 				NEXT_STATE = 0
 			else:
 				print("Junk")
-			
+
+def fxn():
+    warnings.warn("deprecated", DeprecationWarning)
+
 def print_console(input):
 	print("[INFO] {}".format(input))
 
@@ -177,9 +184,6 @@ def rl_dispense_food(animal):
 	# Push bowl out
 	change_bowl_pos()
  
- 
-
-
 def enviroment_step(action):
     global NEXT_STATE
 
