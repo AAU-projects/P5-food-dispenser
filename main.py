@@ -25,17 +25,18 @@ NEXT_STATE = 0
 
 CAT = 0
 DOG = 1
+JUNK = 2
 
 BRICK = nxt.locator.find_one_brick()
 
 def main():
 	oldDist = get_range()
 	running = True
+	print_console("Waiting for movement...")
 	while running:
-		print_console("Waiting for movement...")
 		newDist = get_range()
 
-		if newDist != oldDist:
+		if abs(newDist - oldDist) > 5:
 			oldDist = newDist
 			
 			print_console("Taking pictures")
@@ -44,15 +45,19 @@ def main():
 			# Pictures analyzed ML
 			print_console("Predicting from pictures")
 			result = predict_folder(DIRECTORY)
+			print(result)
 			
-			# do something based on ML respond
-			dispense_food(result)
-			
-			#Wait for the animal to finish, then close
-			#wait_and_close()
-			time.sleep(2)
-			change_bowl_pos()
-			turn_gate()
+			if not (result == -1 or result == 2):
+				# do something based on ML respond
+				dispense_food(result)
+				
+				#Wait for the animal to finish, then close
+				#wait_and_close()
+				time.sleep(2)
+				change_bowl_pos()
+				turn_gate()
+			else:
+				print("Junk")
 			
 def print_console(input):
 	print("[INFO] {}".format(input))
@@ -95,7 +100,6 @@ def wait_and_close():
 	turn_gate()
 
 def open_containers(animal):
-  bowl_forward_small()
   if(animal == CAT):
     turn_motor(BOWLPORT, 45, 90)
     sleep(1)
@@ -103,7 +107,7 @@ def open_containers(animal):
   else:
     turn_motor(BOWLPORT, -45, 90)
     sleep(1)
-    turn_moter(BOWLPORT, 45, 90)
+    turn_motor(BOWLPORT, 45, 90)
   bowl_backward_small()
 
 def rotate_bowl():
