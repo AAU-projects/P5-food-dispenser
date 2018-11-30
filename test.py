@@ -11,22 +11,24 @@ from keras.optimizers import Adam
 INPUT:
     [0] - Model predicted that the image was of a cat
     [1] - Model predicted that the image was of a dog
-    
+
 OUTPUT:
     [0] - rotate for cat
     [1] - rotate for dog
 '''
 # https://keon.io/deep-q-learning/
 # http://adventuresinmachinelearning.com/reinforcement-learning-tutorial-python-keras/
+
+
 class DispenseAgent:
     def __init__(self, state_size, action_size):
-        self.state_size = state_size # input size
-        self.action_size = action_size # output size
+        self.state_size = state_size  # input size
+        self.action_size = action_size  # output size
         self.gamma = 0.95    # discount rate
         self.epsilon = 1.0  # exploration rate
-        self.epsilon_min = 0.01 # min exploration rate
-        self.epsilon_decay = 0.995 
-        
+        self.epsilon_min = 0.01  # min exploration rate
+        self.epsilon_decay = 0.95
+
         # Adds rewards in this array. 0 is rewards for the feed cat action, 1 is rewards for the feed dog action.
         self.memory = deque(maxlen=2000)
 
@@ -73,51 +75,41 @@ class DispenseAgent:
     def save(self, name):
         self.model.save_weights(name)
 
+
 class FoodDispenser:
     def __init__(self):
         self.reset()
 
     def reset(self):
-        self.predict = random.randint(0, 1)
+        self.predict = random.randint(0, 1)  # random if cat or dog
         self.reward = 0
         self.next_state = 0
-        self.state_size = 3 # input size
-        self.action_size = 2 # output size
-
-        #Food dispenser (0 cat, 1 dog)
-        self.bowl_rotation = 0
-        self.dispense_rotation = 0
+        self.state_size = 1  # input size
+        self.action_size = 2  # output size
 
         self.done = False
 
-        return [self.predict, self.bowl_rotation, self.dispense_rotation]
+        return self.predict
 
     def rotate_bowl(self, action):
-        # No rotate bowl
-        if (action == 0):
-            self.bowl_rotation = 0
-            # If cat reward else not            
+        # If cat reward else not
+        if action == 0:
             if self.predict == 0:
                 self.reward += 1
             else:
-                self.reward += -1  
-                
-        # Rotate bowl          
-        elif (action == 1):
-            self.bowl_rotation = 1
-            # If dog reward else not
+                self.reward += -1
+        # If dog reward else not
+        elif action == 1:
             if self.predict == 1:
                 self.reward += 1
             else:
                 self.reward += -1
-
         # Increase function step
         self.next_state += 1
 
     def rotate_dispenser(self, action):
         # Dispense cat food
         if (action == 0):
-            self.dispense_rotation = 0            
             # If cat reward else not
             if self.predict == 0:
                 self.reward += 1
@@ -125,7 +117,6 @@ class FoodDispenser:
                 self.reward += -1
         # Dispense dog food
         elif (action == 1):
-            self.dispense_rotation = 1
             # If dog reward else not
             if self.predict == 1:
                 self.reward += 1
@@ -139,17 +130,17 @@ class FoodDispenser:
             self.rotate_dispenser(action)
             self.done = True
             
-        return [self.predict, self.bowl_rotation, self.dispense_rotation], self.reward, self.done
+        return self.predict, self.reward, self.done
 
-EPISODES = 1000
+EPISODES = 200
 if __name__ == "__main__":
     env = FoodDispenser()
     state_size = env.state_size
     action_size = env.action_size
     agent = DispenseAgent(state_size, action_size)
-    #agent.load("food_dispenser.h5")
+    # agent.load("food_dispenser.h5")
     done = False
-    batch_size = 32
+    batch_size = 16
 
     for e in range(0, EPISODES):
         state = env.reset()
@@ -158,7 +149,7 @@ if __name__ == "__main__":
             action = agent.act(state)
             next_state, reward, done = env.step(action)
 
-            #reward = reward if done else -1
+            # reward = reward if done else -1
 
             next_state = np.reshape(next_state, [1, state_size])
             agent.remember(state, action, reward, next_state, done)
