@@ -69,19 +69,6 @@ def print_console(input):
 def dispense_food(animal):
 	rl_dispense_food(animal)
 
-	#Rotate the bowl if it is not in the correct position
-	if BOWLROT != animal:
-		rotate_bowl()
-		
-	# dispense food
-	open_containers(animal)
-	#Rotate the bowl so the right side faces outward to the animal
-	rotate_bowl()
-	# Open gate
-	turn_gate()
-	# Push bowl out
-	change_bowl_pos()
-
 def bowl_forward_small():
   turn_motor(MOTORPORT, 45, 20)
   
@@ -169,17 +156,26 @@ def get_action(animal, agent):
     return action
 
 def rl_dispense_food(animal):
-    # Setup enviroment
+	# Setup enviroment
 
-    # Setup agent
-    agent = DispenseAgent(1, 2)
-    agent.load("food_dispenser.h5")
+	# Setup agent
+	agent = DispenseAgent(1, 2)
+	agent.load("food_dispenser.h5")
 
-    action = get_action(animal, agent)
-    enviroment_step(action)
+	action = get_action(animal, agent)
+	enviroment_step(action)
 
-    # dispense food
-    # open_containers(animal)
+	action = get_action(animal, agent)
+	enviroment_step(action)
+
+	#Rotate the bowl so the right side faces outward to the animal
+	rotate_bowl()
+	
+	# Open gate
+	turn_gate()
+	
+	# Push bowl out
+	change_bowl_pos()
 
 
 def enviroment_step(action):
@@ -206,14 +202,8 @@ def rotate_bowl_rl(action):
     NEXT_STATE += 1
 
 def rotate_dispenser_rl(action):
-    # Dispense cat food
-    if (action == 0):
-        print('dispesning cat food')
-        # If cat reward else not
-    # Dispense dog food
-    elif (action == 1):
-        print('dispesning dog food')
-        # If dog reward else not
+    # Dispense food
+    open_containers(action)
 
 if __name__ == "__main__":
 	main()
