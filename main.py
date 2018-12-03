@@ -59,15 +59,12 @@ def main():
 					print("[ERROR] image capture fail")
 			
 			if not (result == -1 or result == 2):
-				# do something based on ML respond
-				dispense_food(result)
+				# Send result to the reinforment model
+				rl_dispense_food(result)
 				
 				#Wait for the animal to finish, then close
-				#wait_and_close()
-				time.sleep(2)
-				change_bowl_pos()
-				turn_gate()
-				
+				wait_and_close()
+
 				if result == CAT:
 					rotate_bowl()
 			
@@ -77,9 +74,6 @@ def main():
 
 def print_console(input):
 	print("[INFO] {}".format(input))
-
-def dispense_food(animal):
-	rl_dispense_food(animal)
 
 def bowl_forward_small():
   turn_motor(MOTORPORT, 45, 20)
@@ -121,18 +115,18 @@ def open_containers(animal):
   bowl_backward_small()
 
 def rotate_bowl():
-	# Rotate the bowl 180 by moving it back and forward to make sure we dont dispense the food prematurely.
-  turn_motor(BOWLPORT, 45, 50)
-  bowl_forward_small()
-  turn_motor(BOWLPORT, -45, 50)
-  bowl_backward_small()
-  turn_motor(BOWLPORT, 45, 50)
-  bowl_forward_small()
-  turn_motor(BOWLPORT, -45, 50)
-  bowl_backward_small()
-  
-  global BOWLROT 
-  BOWLROT = not BOWLROT
+    # Rotate the bowl 180 by moving it back and forward to make sure we dont dispense the food prematurely.
+    turn_motor(BOWLPORT, 45, 50)
+    bowl_forward_small()
+    turn_motor(BOWLPORT, -45, 50)
+    bowl_backward_small()
+    turn_motor(BOWLPORT, 45, 50)
+    bowl_forward_small()
+    turn_motor(BOWLPORT, -45, 50)
+    bowl_backward_small()
+
+    global BOWLROT 
+    BOWLROT = not BOWLROT
 
 def change_bowl_pos():
 	print_console("Moving bowl")
@@ -189,26 +183,22 @@ def enviroment_step(action):
     if NEXT_STATE == 0:
         rotate_bowl_rl(action)
     elif NEXT_STATE == 1:
-        rotate_dispenser_rl(action)
+        # Dispense food
+        open_containers(action)
         NEXT_STATE = 0
 
 def rotate_bowl_rl(action):
-    # No rotate bowl
+    # No rotation of bowl
     if (action == 0):
         print('not rotating bowl')
     # Rotate bowl
     elif (action == 1):
         print('rotating bowl')
         rotate_bowl()
-    # if BOWLROT != action:
 
     # Increase function step
     global NEXT_STATE
     NEXT_STATE += 1
-
-def rotate_dispenser_rl(action):
-    # Dispense food
-    open_containers(action)
 
 if __name__ == "__main__":
 	main()

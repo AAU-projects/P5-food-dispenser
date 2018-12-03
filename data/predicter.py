@@ -11,6 +11,7 @@ import cv2
 import glob
 
 model = load_model('model/model.h5')
+THRESHOLD = 0.8
 
 def convert_to_array(img):
     img = cv2.imread(img)
@@ -19,16 +20,12 @@ def convert_to_array(img):
 
     return np.array(resized_image)
 
-def get_animal_name(score):
+def get_class_with_threshold(score):
     print(score[0])
-    if score[0][0] > 0.8:
-        return 0
-    if score[0][1] > 0.8:
-        return 1
-    if score[0][2] > 0.8:
-        return 2
+    for x in range(0, len(score)):
+        if score[0][x] > THRESHOLD:
+            return x
     return -1
-
 
 def predict_animal(file, model):
     ar = convert_to_array(file)
@@ -39,9 +36,8 @@ def predict_animal(file, model):
     score = model.predict(a, verbose=0)
     acc = np.max(score)
     for x in range(0, 3):
-      print(round(score[0][x],10))
-    return get_animal_name(score)
-
+        print(round(score[0][x],10))
+    return get_class_with_threshold(score)
 
 def predict_folder(destination):
     predictions_array = []
