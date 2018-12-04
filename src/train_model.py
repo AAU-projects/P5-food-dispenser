@@ -1,5 +1,4 @@
 import inspect
-from keras_svm import ModelSVMWrapper
 from src.graphs import Graphs
 from src.image_processing import ImageProcessing
 from src.file_system import FileSystem
