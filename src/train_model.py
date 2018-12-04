@@ -1,4 +1,5 @@
 import inspect
+import src.CommonVars as vars
 from src.graphs import Graphs
 from src.image_processing import ImageProcessing
 from src.file_system import FileSystem
@@ -17,16 +18,14 @@ class TrainModel:
         self.epoch_size = 100   # total number of runs
         self.batch_size = 128 # parts to split dataset into
         self.dataset_split_percentage = 0.9
-        self.number_of_classes = 3
         self.training_lenght = 0
         self.validation_lenght = 0
-        self.img_width, self.img_height = 128, 128
 
     def __create_model(self):
 
         model = Sequential()
 
-        model.add(Conv2D(32, (3, 3), input_shape=(self.img_width, self.img_height, 3)))
+        model.add(Conv2D(32, (3, 3), input_shape=(vars.img_height, vars.img_width, 3)))
         model.add(BatchNormalization())
         model.add(Activation('relu'))
         model.add(Conv2D(32, (3, 3)))
@@ -53,7 +52,7 @@ class TrainModel:
         model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
         model.add(Dense(512))
         model.add(Activation('relu'))
-        model.add(Dense(self.number_of_classes))
+        model.add(Dense(vars.num_classes))
         model.add(Activation('softmax'))
 
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy', 'categorical_crossentropy'])

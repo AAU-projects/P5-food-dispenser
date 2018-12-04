@@ -2,14 +2,14 @@ import os
 
 # Hidden vars
 
-__picturePath = "new data"
+__picturePath = "data"
 
 
 # Static vars
 
-classes = ["cats", "dogs", "junk"]
+classes = ["cats", "dogs"]
 picture_folders = ['dataset', 'evalset']
-img_hight, img_width = 128, 128
+img_height, img_width = 128, 128
 
 
 # Dynamic vars

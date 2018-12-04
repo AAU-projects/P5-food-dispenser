@@ -15,12 +15,13 @@ if __name__ == "__main__":
             model = keras.models.load_model(model_path)
             me = ModelEvaluate()
 
-            score = me.evaluate_model(model, f"{vars.picturePath}/{vars.picture_folders[1]}/", True)
+            picture_path = os.path.join(vars.picturePath, vars.picture_folders[1])
+            score = me.evaluate_model(model, picture_path, True)
             score_rounded = f"{round(score[1], 5):.5f}"
             print(f"All {score_rounded}")
             sum = 0.0
             for x in range(0, vars.num_classes):
-                score = me.evaluate_model(model, f"{vars.picturePath}/{vars.picture_folders[1]}/{vars.classes[x]}", False)
+                score = me.evaluate_model(model, os.path.join(picture_path, vars.classes[x]), False)
                 score_rounded = f"{round(score[1], 5):.5f}"
                 sum += float(score_rounded)
                 print(f"{vars.classes[x]} {score_rounded}")

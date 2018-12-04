@@ -3,24 +3,17 @@ import sys
 import cv2
 import numpy as np
 import keras
+import src.CommonVars as vars
 from glob import glob
 from PIL import Image
 from keras.utils import np_utils, to_categorical
 
 class ImageProcessing:
-
-    def __init__(self, *args, **kwargs):
-        self.image_labels = ["cats", "dogs", "junk"]
-        self.training_data_path = "new data"
-        self.img_width_height = (128, 128)
-        self.picture_folders = ['dataset', 'evalset']
-        self.num_classes = len(self.image_labels)
-
     def load_image(self, filepath):
         img = cv2.imread(filepath)
         try:
             img_from_ar = Image.fromarray(img, 'RGB')
-            resized_image = img_from_ar.resize(self.img_width_height)
+            resized_image = img_from_ar.resize((vars.img_width, vars.img_height))
 
             return np.array(resized_image)
         except AttributeError:
@@ -36,11 +29,11 @@ class ImageProcessing:
         labels_full = []
         print("[LOG] Loading " + dataset_type)
 
-        folder_path = os.path.join(folder, self.training_data_path, dataset_type)
+        folder_path = os.path.join(folder, vars.picturePath, dataset_type)
 
-        for x in range(0, len(self.image_labels)):
-            print("[LOG] Loading " + self.image_labels[x])
-            data, labels, path = self.load_type(folder_path, self.image_labels[x], x)
+        for x in range(0, len(vars.classes)):
+            print("[LOG] Loading " + vars.classes[x])
+            data, labels, path = self.load_type(folder_path, vars.classes[x], x)
             self.save_images(data, labels, path, dataset_type)
             data_full.extend(data)
             labels_full.extend(labels)
@@ -68,13 +61,13 @@ class ImageProcessing:
         return data, labels, dataset_path
 
     def generate_labels(self, path=os.getcwd()):
-        for i in range(0, len(self.picture_folders)):
-            self.load_picture_folders(self.picture_folders[i], path)
+        for i in range(0, len(vars.picture_folders)):
+            self.load_picture_folders(vars.picture_folders[i], path)
 
     def retrive_dataset(self, datatype):
         print("Loading images")
-        animals = np.load(f"{self.training_data_path}/{datatype}/pictures_{datatype}.npy")
-        labels = np.load(f"{self.training_data_path}/{datatype}/labels_{datatype}.npy")
+        animals = np.load(f"{vars.picturePath}/{datatype}/pictures_{datatype}.npy")
+        labels = np.load(f"{vars.picturePath}/{datatype}/labels_{datatype}.npy")
 
         return animals, labels
 
@@ -88,12 +81,12 @@ class ImageProcessing:
 
         # One hot encoding
         # print("One hot encoding")
-        labels = keras.utils.to_categorical(labels, self.num_classes)
+        labels = keras.utils.to_categorical(labels, vars.num_classes)
 
         return pictures, labels
 
     def retrieve_train_validation(self, shuffle=True, procent_split=0.9):
-        pictures, labels = self.retrive_dataset(self.picture_folders[0])
+        pictures, labels = self.retrive_dataset(vars.picture_folders[0])
         pictures, labels = self.__shuffle(pictures, labels)
         train_size = int(len(pictures) * procent_split)
 
@@ -110,8 +103,8 @@ class ImageProcessing:
 
         # One hot encoding
         print("One hot encoding")
-        labels_train = keras.utils.to_categorical(labels_train, self.num_classes)
-        labels_validation = keras.utils.to_categorical(labels_validation, self.num_classes)
+        labels_train = keras.utils.to_categorical(labels_train, vars.num_classes)
+        labels_validation = keras.utils.to_categorical(labels_validation, vars.num_classes)
 
         return pictures_train, labels_train, pictures_validation, labels_validation
 
