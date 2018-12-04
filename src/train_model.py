@@ -15,7 +15,7 @@ class TrainModel:
         self.ip = ImageProcessing()
         self.eval = ModelEvaluate()
 
-        self.epoch_size = 10   # total number of runs
+        self.epoch_size = 100   # total number of runs
         self.batch_size = 128 # parts to split dataset into
         self.dataset_split_percentage = 0.9
         self.number_of_classes = 3
@@ -24,7 +24,7 @@ class TrainModel:
         self.img_width, self.img_height = 128, 128
 
     def __create_model(self):
-        
+
         model = Sequential()
 
         model.add(Conv2D(32, (3, 3), input_shape=(self.img_width, self.img_height, 3)))
@@ -88,8 +88,8 @@ class TrainModel:
         # Tensor Callbacks, TensorBoard and Early stopping
         tensorboard_name = str(time())
         tensorboard = TensorBoard(log_dir="logs/{}".format(tensorboard_name));
-        earlyStop = EarlyStopping(monitor='val_loss', min_delta=0, patience=20, verbose=1, mode='auto', restore_best_weights=True)
-        
+        earlyStop = EarlyStopping(monitor='val_acc', min_delta=0, patience=20, verbose=1, mode='auto', restore_best_weights=True)
+
         # Train the model
         history, score = self.__fit_model(model, [tensorboard, earlyStop])
 
@@ -107,12 +107,12 @@ class TrainModel:
 
         # Save model summery
         lines = inspect.getsource(self.__create_model)
-        FileSystem.save_model_summary(lines, model_path, model_name, self.training_lenght, 
+        FileSystem.save_model_summary(lines, model_path, model_name, self.training_lenght,
                                         self.validation_lenght)
 
         # Renames model log
         FileSystem.rename_model_log(tensorboard_name, model_name)
-        
+
 
 if __name__ == "__main__":
     tm = TrainModel()
