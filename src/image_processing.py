@@ -15,66 +15,72 @@ class ImageProcessing:
         self.img_width_height = (128, 128)
         self.generate_folders = ['dataset', 'test']
 
-    def __load_image(self, filepath):
+    def load_image(self, filepath):
         img = cv2.imread(filepath)
         img_from_ar = Image.fromarray(img, 'RGB')
         resized_image = img_from_ar.resize(self.img_width_height)
 
         return np.array(resized_image)
 
-    def __load_images(self, dataset_type, folder):
+    def save_images(self, classes, labels, path, dataset_type):
+            np.save(os.path.join(path, "animals_" + dataset_type), np.array(classes))
+            np.save(os.path.join(path, "labels_" + dataset_type), np.array(labels))
+
+    def load_generate_folders(self, dataset_type, folder):
+        data_full = []
+        labels_full = []
         print("[LOG] Loading " + dataset_type)
-        folder_path = os.path.join(
-            folder, self.training_data_path, dataset_type)
-        data, labels = self.__load_type(folder_path)
+        
+        folder_path = os.path.join(folder, self.training_data_path, dataset_type)
+
+        for x in range(0, len(self.image_labels)):
+            data, labels, path = self.load_type(folder_path, self.image_labels[x], x)
+            self.save_images(data, labels, path, dataset_type)
+            data_full.extend(data)
+            labels_full.extend(labels)
 
         if len(data) > 0:
-            animals = np.array(data)
-            labels = np.array(labels)
+            self.save_images(data_full, labels_full, folder_path, dataset_type)
 
-            print("[LOG] Saving results, this might take some time")
-            np.save(os.path.join(folder_path, "animals_" + dataset_type), animals)
-            np.save(os.path.join(folder_path, "labels_" + dataset_type), labels)
-
-    def __load_type(self, training_path):
+    def load_type(self, training_path, image_label, class_value):
+        # Retreiving dataset for classes
         data = []
         labels = []
-
-        # Retreiving dataset for classes
-        for x in range(0, len(self.image_labels)):
-            dataset_path = os.path.join(
-                os.getcwd(), training_path, self.image_labels[x])
-            if not os.path.exists(dataset_path):
-                print(f"[ERROR] Requires data folder at {dataset_path}")
-                continue
-            animals = glob(dataset_path + "/*.*")
+        dataset_path = os.path.join(os.getcwd(), training_path, image_label)
+        if os.path.exists(dataset_path):                
+            animals = glob(dataset_path + "/*.jpg")
+            animals.extend(glob(dataset_path + "/*.png"))
             for animal in animals:
-                data.append(self.__load_image(animal))
-                labels.append(x)
+                data.append(self.load_image(animal))
+                labels.append(class_value)
                 if (len(data) % 500 == 0):
                     print(f"[LOG] {len(data)}")
+        else: 
+            print(f"[ERROR] Requires data folder at {dataset_path}")
 
-        return data, labels
+        return data, labels, dataset_path
 
     def generate_labels(self, path=os.getcwd()):
         for i in range(0, len(self.generate_folders)):
-            self.__load_images(self.generate_folders[i], path)
+            self.load_generate_folders(self.generate_folders[i], path)
 
 
-    def retrive_dataset_old(self, datatype):
-        print("Loading animals")
+    def retrive_dataset(self, datatype):
+        print("Loading dataset")
         animals = np.load(f"data/{datatype}/animals_{datatype}.npy")
         labels = np.load(f"data/{datatype}/labels_{datatype}.npy")
 
         return animals, labels
         
-    def retrive_dataset_test(self):
-        print("Loading animals")
-        animals, labels = self.retrive_dataset_old("test")
+    def retrive_dataset_path(self, path, datatype):
+        print("Loading dataset")
+        animals = np.load(f"{path}/animals_{datatype}.npy")
+        labels = np.load(f"{path}/labels_{datatype}.npy")
+        
         animals, labels = self.__shuffle(animals, labels)
         animals = animals.astype('float32')/255
 
-        num_classes = 2
+        num_classes = len(self.image_labels)
         # One hot encoding
         print("One hot encoding")
         labels = keras.utils.to_categorical(labels, num_classes)
@@ -83,7 +89,7 @@ class ImageProcessing:
         
 
     def retrieve_train_validation(self, shuffle=True, procent_split=0.9):
-        animals, labels = self.retrive_dataset_old("dataset")
+        animals, labels = self.retrive_dataset("dataset")
 
         animals, labels = self.__shuffle(animals, labels)
 
@@ -96,7 +102,7 @@ class ImageProcessing:
         animals_train = animals_train.astype('float32')/255
         animals_validation = animals_validation.astype('float32')/255
 
-        num_classes = 2
+        num_classes = len(self.image_labels)
         # One hot encoding
         print("One hot encoding")
         labels_train = keras.utils.to_categorical(labels_train, num_classes)
