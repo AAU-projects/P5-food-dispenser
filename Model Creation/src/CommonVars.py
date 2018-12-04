@@ -2,7 +2,7 @@ import os
 
 # Hidden vars
 
-__picturePath = "data"
+__picturePath = "new data"
 
 
 # Static vars
