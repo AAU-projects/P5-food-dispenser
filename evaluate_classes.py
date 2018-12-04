@@ -1,9 +1,8 @@
 import os
 import sys
+import src.CommonVars as vars
 from glob import glob
 from src.model_evaluate import ModelEvaluate
-
-classes = ['cats', 'dogs']
 
 if __name__ == "__main__":
     if (len(sys.argv) > 1):
@@ -16,22 +15,17 @@ if __name__ == "__main__":
             model = keras.models.load_model(model_path)
             me = ModelEvaluate()
 
-            score = me.evaluate_model(model, f"data/test/", True)
+            score = me.evaluate_model(model, f"{vars.picturePath}/{vars.picture_folders[1]}/", True)
             score_rounded = f"{round(score[1], 5):.5f}"
             print(f"All {score_rounded}")
             sum = 0.0
-            for x in range(0, len(classes)):
-                score = me.evaluate_model(model, f"data/test/{classes[x]}", False)
+            for x in range(0, vars.num_classes):
+                score = me.evaluate_model(model, f"{vars.picturePath}/{vars.picture_folders[1]}/{vars.classes[x]}", False)
                 score_rounded = f"{round(score[1], 5):.5f}"
                 sum += float(score_rounded)
-                print(f"{classes[x]} {score_rounded}")
-            print(f"Average {sum/len(classes)}")
+                print(f"{vars.classes[x]} {score_rounded}")
+            print(f"Average {sum/vars.num_classes}")
         else:
             print('Model not found')
     else:
         print('Model input required')
-
-
-
-
-

@@ -79,7 +79,7 @@ class ImageProcessing:
         return animals, labels
 
     def retrive_dataset_path(self, path, datatype):
-        print("Loading images")
+        # print("Loading images")
         pictures = np.load(f"{path}/pictures_{datatype}.npy")
         labels = np.load(f"{path}/labels_{datatype}.npy")
 
@@ -87,7 +87,7 @@ class ImageProcessing:
         pictures = pictures.astype('float32')/255
 
         # One hot encoding
-        print("One hot encoding")
+        # print("One hot encoding")
         labels = keras.utils.to_categorical(labels, self.num_classes)
 
         return pictures, labels
