@@ -18,27 +18,27 @@ def control_loop():
             change_bowl_pos(False)
         elif(text == "bowlout"):
             change_bowl_pos(True)
-        elif(text == "rotbowlf"):
+        elif(text == "rotbowl+"):
             rotate_bowl(False)
-        elif(text == "rotbowlt"):
+        elif(text == "rotbowl-"):
             rotate_bowl(True)
         elif(text[0] == 'A'):
             step = int(text[3:])
-            if(text[1] == 'F'):
+            if(text[1] == '+'):
                 rotate_motor2(PORT_A, 1, step)
-            elif(text[1] == 'T'):
+            elif(text[1] == '-'):
                 rotate_motor2(PORT_A, -1, step)
         elif(text[0] == 'B'):
             step = int(text[3:])
-            if(text[1] == 'F'):
+            if(text[1] == '+'):
                 rotate_motor2(PORT_B, 1, step)
-            elif(text[1] == 'T'):
+            elif(text[1] == '-'):
                 rotate_motor2(PORT_B, -1, step)
         elif(text[0] == 'C'):
             step = int(text[3:])
-            if(text[1] == 'F'):
+            if(text[1] == '+'):
                 rotate_motor2(PORT_C, 1, step)
-            elif(text[1] == 'T'):
+            elif(text[1] == '-'):
                 rotate_motor2(PORT_C, -1, step)
         else:
             print("Unrecognized input")
