@@ -21,14 +21,13 @@ OUTPUT:
 
 class DispenseAgent:
     def __init__(self, state_size, action_size):
-        self.state_size = state_size  # input size
-        self.action_size = action_size  # output size
-        self.gamma = 0.95    # discount rate
-        self.epsilon = 1.0  # exploration rate
-        self.epsilon_min = 0.01  # min exploration rate
+        self.state_size = state_size                    # Input size.
+        self.action_size = action_size                  # Output size.
+        self.gamma = 0.95                               # Discount rate.
+        self.epsilon = 1.0                              # Exploration rate.
+        self.epsilon_min = 0.01                         # Min exploration rate.
         self.epsilon_decay = 0.95
 
-        # Adds rewards in this array. 0 is rewards for the feed cat action, 1 is rewards for the feed dog action.
         self.memory = deque(maxlen=2000)
 
         self.model = self._buildmodel()
@@ -44,13 +43,13 @@ class DispenseAgent:
 
     def act(self, state):
         if np.random.rand() <= self.epsilon:
-            return random.randrange(self.action_size)
+            return random.randrange(self.action_size)   # Guesses and action.
         act_values = self.model.predict(state)
-        return np.argmax(act_values[0])  # returns action
+        return np.argmax(act_values[0])                 # Returns action.
 
     def predict(self, state):
         act_values = self.model.predict(state)
-        return np.argmax(act_values[0])  # returns action
+        return np.argmax(act_values[0])                 # Returns action.
 
     def remember(self, state, action, reward, next_state, done):
             self.memory.append((state, action, reward, next_state, done))
@@ -80,42 +79,50 @@ class FoodDispenser:
         self.reset()
 
     def reset(self):
-        self.predict = random.randint(0, 1)  # random if cat or dog
+        self.predict = random.randint(0, 1) # Random if cat or dog.
         self.reward = 0
         self.next_state = 0
-        self.state_size = 1  # input size
-        self.action_size = 2  # output size
+        self.state_size = 1                 # Input size.
+        self.action_size = 2                # Output size.
+
+        self.bowl_position = 0
+        self.dispenser_position = 0
 
         self.done = False
 
-        return self.predict
+        return [self.predict, self.bowl_position, self.dispenser_position]
 
     def rotate_bowl(self, action):
-        # If cat reward else not
-        if action == 0:
-            if self.predict == 0:
+        # Rotate bowl for cat food.
+        if action == 0:                     # Action is: don't rotate bowl.
+            self.bowl_position = 0          # Set bowl_position to use with the next_state.
+            if self.predict == 0:           # Action is the same as the prediction, therefore reward. (Cat food)
                 self.reward += 1
             else:
-                self.reward += -1
-        # If dog reward else not
-        elif action == 1:
-            if self.predict == 1:
+                self.reward += -1           # Action is not the same as the prediction, therefore punish.
+
+        # Rotate bowl for dog food.
+        elif action == 1:                   # Action is: rotate bowl.
+            self.bowl_position = 1          # Set bowl_position to use with the next_state.
+            if self.predict == 1:           # Action is the same as the prediction, therefore reward. (Dog food)
                 self.reward += 1
             else:
-                self.reward += -1
-        # Increase function step
-        self.next_state += 1
+                self.reward += -1           # Action is not the same as the prediction, therefore punish.
+
+        self.next_state += 1                # Increase function step.
 
     def rotate_dispenser(self, action):
-        # Dispense cat food
+        # Dispense cat food.
         if (action == 0):
+            self.dispenser_position = 0
             # If cat reward else not
             if self.predict == 0:
                 self.reward += 1
             else:
                 self.reward += -1
-        # Dispense dog food
+        # Dispense dog food.
         elif (action == 1):
+            self.dispenser_position = 1
             # If dog reward else not
             if self.predict == 1:
                 self.reward += 1
@@ -129,39 +136,31 @@ class FoodDispenser:
             self.rotate_dispenser(action)
             self.done = True
             
-        return self.predict, self.reward, self.done
+        return [self.predict, self.bowl_position, self.dispenser_position], self.reward, self.done
 
 EPISODES = 200
 if __name__ == "__main__":
-    env = FoodDispenser()
-    state_size = env.state_size
-    action_size = env.action_size
-    agent = DispenseAgent(state_size, action_size)
-    # agent.load("food_dispenser.h5")
+    env = FoodDispenser()                                                           # Create new environment.
+    agent = DispenseAgent(env.state_size, env.action_size)                          # Create new agent.
     done = False
-    batch_size = 16
+    batch_size = 16                                                                 # Set batch size.
 
     for e in range(0, EPISODES):
-        state = env.reset()
-        state = np.reshape(state, [1, state_size])
-        for step in range(2):
-            action = agent.act(state)
-            next_state, reward, done = env.step(action)
+        state = env.reset()                                                         # State set to predict variable of environment. (0 or 1)
 
-            # reward = reward if done else -1
+        for step in range(2):                                                       # Go through all steps.
+            action = agent.act(state)                                               # The agent makes an action from the current state.
+            next_state, reward, done = env.step(action)                             # Takes an action, and returns the state of the environment.
 
-            next_state = np.reshape(next_state, [1, state_size])
             agent.remember(state, action, reward, next_state, done)
             state = next_state
 
-            # Done becomes True when no more steps 
-            # The agent drops the pole
-            if done:
+            if done:                                                                # Done becomes True when no more steps.
                 print("episode: {}/{}, score: {}, e: {:.2}, step {}"
                         .format(e + 1, EPISODES, reward, agent.epsilon, step))
                 break
-            # train the agent with the experience of the episode
-            if len(agent.memory) > batch_size:
+
+            if len(agent.memory) > batch_size:                                      # Train the agent with the experience of the episode.
                 agent.replay(batch_size)
                 
     print('Saving model')
