@@ -8,21 +8,21 @@ from time import time
 from keras.models import Sequential
 from keras.optimizers import SGD
 from keras.layers import Conv2D, Activation, Dense, MaxPooling2D, Flatten, Dropout, BatchNormalization
-from keras.callbacks import TensorBoard, EarlyStopping
 
 class TrainModel:
     def __init__(self, *args, **kwargs):
         self.ip = ImageProcessing()
         self.eval = ModelEvaluate()
-
-        self.epoch_size = 100   # total number of runs
-        self.batch_size = 128 # parts to split dataset into
-        self.dataset_split_percentage = 0.9
         self.training_lenght = 0
         self.validation_lenght = 0
 
-    def __create_model(self):
+        # Variables for the training
+        self.epoch_size = 100                   # Total number of runs
+        self.batch_size = 128                   # Parts to split dataset into
+        self.dataset_split_percentage = 0.9     # The split of the dataset for training and validation
 
+
+    def __create_model(self):
         model = Sequential()
 
         model.add(Conv2D(32, (3, 3), input_shape=(vars.img_height, vars.img_width, 3)))
@@ -49,7 +49,7 @@ class TrainModel:
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(3, 3)))
 
-        model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
+        model.add(Flatten()) 
         model.add(Dense(512))
         model.add(Activation('relu'))
         model.add(Dense(vars.num_classes))
@@ -81,20 +81,16 @@ class TrainModel:
         return pictures_train, labels_train, pictures_validation, labels_validation
 
     def train_model(self):
+        # Creates the model
         model = self.__create_model()
 
-        # Tensor Callbacks, TensorBoard and Early stopping
-        tensorboard_name = str(time())
-        tensorboard = TensorBoard(log_dir="logs/{}".format(tensorboard_name));
-        earlyStop = EarlyStopping(monitor='val_acc', min_delta=0, patience=20, verbose=1, mode='auto', restore_best_weights=True)
-
         # Train the model
-        history, score = self.__fit_model(model, [tensorboard, earlyStop])
+        history, score = self.__fit_model(model, vars.callbacks)
 
-        # Generate the name of the just trained model, and get the file location to store it at
+        # Generate the name of the just trained model, and get the file directory to store it at
         score_rounded = f"{round(score[1], 3):.3f}"
-        model_name = FileSystem.get_model_name(score_rounded, self.epoch_size, self.batch_size)
-        model_path = FileSystem.get_model_path(model_name)
+        model_name = FileSystem.generate_model_name(score_rounded, self.epoch_size, self.batch_size)
+        model_path = FileSystem.generate_model_path(model_name)
 
         # Save the model to disk
         print("[LOG] New model saved in " + model_path)
@@ -109,7 +105,7 @@ class TrainModel:
                                         self.validation_lenght)
 
         # Renames model log
-        FileSystem.rename_model_log(tensorboard_name, model_name)
+        FileSystem.rename_model_log(vars.tensorboard_name, model_name)
 
 
 if __name__ == "__main__":
