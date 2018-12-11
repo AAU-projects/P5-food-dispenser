@@ -18,27 +18,27 @@ def control_loop():
             change_bowl_pos(False)
         elif(text == "bowlout"):
             change_bowl_pos(True)
-        elif(text == "rotbowlf"):
+        elif(text == "rotbowl+"):
             rotate_bowl(False)
-        elif(text == "rotbowlt"):
+        elif(text == "rotbowl-"):
             rotate_bowl(True)
         elif(text[0] == 'A'):
             step = int(text[3:])
-            if(text[1] == 'F'):
+            if(text[1] == '+'):
                 rotate_motor(PORT_A, 1, step)
-            elif(text[1] == 'T'):
+            elif(text[1] == '-'):
                 rotate_motor(PORT_A, -1, step)
         elif(text[0] == 'B'):
             step = int(text[3:])
-            if(text[1] == 'F'):
+            if(text[1] == '+'):
                 rotate_motor(PORT_B, 1, step)
-            elif(text[1] == 'T'):
+            elif(text[1] == '-'):
                 rotate_motor(PORT_B, -1, step)
         elif(text[0] == 'C'):
             step = int(text[3:])
-            if(text[1] == 'F'):
+            if(text[1] == '+'):
                 rotate_motor(PORT_C, 1, step)
-            elif(text[1] == 'T'):
+            elif(text[1] == '-'):
                 rotate_motor(PORT_C, -1, step)
         else:
             print("Unrecognized input")
@@ -48,7 +48,7 @@ def turn_gate(reverse):
 		rotate_motor(PORT_C, -1, 630)
 	else:
 		rotate_motor(PORT_C, 1, 630)
-                
+
 def change_bowl_pos(reverse):
 	#  Drive bowl in and out
 	if(reverse == True):
@@ -57,11 +57,11 @@ def change_bowl_pos(reverse):
 		rotate_motor(PORT_A, -1, 350)
 
 def rotate_bowl(reverse):
-	# Rotate the bowl 180
-  if(reverse == True):
-	  rotate_motor(PORT_B, -1, 250)
-  else:
-    rotate_motor(PORT_B, 1, 250)
+    # Rotate the bowl 180
+    if(reverse == True):
+        rotate_motor(PORT_B, -1, 250)
+    else:
+        rotate_motor(PORT_B, 1, 250)
 
 def rotate_motor(port, speed, amount):
 	motor = Motor(BRICK, port)

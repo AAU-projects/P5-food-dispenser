@@ -12,7 +12,6 @@ from data.predicter import predict_folder
 from time import sleep
 from rl_agent_env import DispenseAgent, FoodDispenser
 
-
 ULTRASONICPORT = PORT_1
 DIRECTORY = os.path.join(os.getcwd(), "pictures")
 BOWLPOS = 0	 # 0 = in, 1 = out
@@ -31,16 +30,19 @@ JUNK = 2
 BRICK = nxt.locator.find_one_brick()
 
 # Setup agent
-agent = DispenseAgent(1, 2)
+agent = DispenseAgent(3, 2)
 agent.load("food_dispenser.h5")
 
 def main():
+	# Get distance from sensor
 	oldDist = get_range()
 	running = True
 	print_console("Waiting for movement...")
 	while running:
+		# Get distance from sensor
 		newDist = get_range()
 
+		# If oldDist != newdist take picture
 		if abs(newDist - oldDist) > 5:
 			oldDist = newDist
 			result = -1
@@ -49,41 +51,44 @@ def main():
 				try:
 					print_console("Taking pictures")
 					take_pictures_CV2(DIRECTORY)
-					# Pictures analyzed ML
+
+					# Classify picture
 					print_console("Predicting from pictures")
 					result = predict_folder(DIRECTORY)
-					result = CAT
 					print(result)
 					break
 				except Exception:
-					print("[ERROR] image capture fail")
+					print_console("Image capture fail", "ERROR")
+					print_console("Trying again")
 			
 			if not (result == -1 or result == 2):
 				# Send result to the reinforment model
 				rl_dispense_food(result)
 				
-				#Wait for the animal to finish, then close
+				# Wait for the animal to finish, then close
 				wait_and_close()
-
-				if result == CAT:
-					rotate_bowl()
-			
-				NEXT_STATE = 0
 			else:
-				print("Junk")
+				print_console("Junk")
 
-def print_console(input):
-	print("[INFO] {}".format(input))
+# Prints message to console
+def print_console(input, type_print="INFO"):
+	print(f"[{type_print}] {input}")
 
+# Moves the bowl a small distance forward
 def bowl_forward_small():
   turn_motor(MOTORPORT, 45, 20)
   
+# Moves the bowl a small distance backward  
 def bowl_backward_small():
   turn_motor(MOTORPORT, -45, 20)
-	
+
+# Waits until there is no significant change in distance, 
+# meaning the pet is not infront of the bowl. Then retracts the bowl
+# and closes the gate	
 def wait_and_close():
 	done = 0
 	count = 0
+	wait_count = 3
 	
 	while(not done):
 		oldDist = get_range()
@@ -92,75 +97,89 @@ def wait_and_close():
 		
 		if oldDist == newDist:
 			count += 1
-			print("WaitCount: " + str(count))
+			print_console(f"Wait count: {count}/{wait_count}")
 		else:
 			count = 0
+			print_console(f"Movement detected")
 		
-		if count >= 3:
+		if count >= wait_count:
 			done = 1
 
 	change_bowl_pos()
 	turn_gate()
 
-def open_containers(animal):
-  bowl_forward_small()
-  if(animal == CAT):
-    turn_motor(BOWLPORT, 45, 90)
-    sleep(1)
-    turn_motor(BOWLPORT, -45, 90)
-  else:
-    turn_motor(BOWLPORT, -45, 90)
-    sleep(1)
-    turn_motor(BOWLPORT, 45, 90)
-  bowl_backward_small()
+	if result == CAT:
+		# Return bowl to start position
+		rotate_bowl()
+
+# Open food containers according to the animal 
+def open_containers(action):
+	bowl_forward_small()
+	# Dispense cat food
+	if(animal == CAT):
+		turn_motor(BOWLPORT, 45, 90)
+		sleep(1)
+		turn_motor(BOWLPORT, -45, 90)
+	# Dispense dog food 
+	elif (animal == DOG):
+		turn_motor(BOWLPORT, -45, 90)
+		sleep(1)
+		turn_motor(BOWLPORT, 45, 90)
+	bowl_backward_small()
 
 def rotate_bowl():
-    # Rotate the bowl 180 by moving it back and forward to make sure we dont dispense the food prematurely.
-    turn_motor(BOWLPORT, 45, 50)
-    bowl_forward_small()
-    turn_motor(BOWLPORT, -45, 50)
-    bowl_backward_small()
-    turn_motor(BOWLPORT, 45, 50)
-    bowl_forward_small()
-    turn_motor(BOWLPORT, -45, 50)
-    bowl_backward_small()
+	# Rotate the bowl 180 by moving it back and forward to make sure we dont dispense the food prematurely.
+	turn_motor(BOWLPORT, 45, 50)
+	bowl_forward_small()
+	turn_motor(BOWLPORT, -45, 50)
+	bowl_backward_small()
+	turn_motor(BOWLPORT, 45, 50)
+	bowl_forward_small()
+	turn_motor(BOWLPORT, -45, 50)
+	bowl_backward_small()
 
-    global BOWLROT 
-    BOWLROT = not BOWLROT
+	global BOWLROT 
+	BOWLROT = not BOWLROT
 
 def change_bowl_pos():
 	print_console("Moving bowl")
-	global BOWLPOS
 	#  Drive bowl in and out
 	if BOWLPOS == 0:
 		turn_motor(MOTORPORT, 45, 350)
-		BOWLPOS = 1
 	elif BOWLPOS == 1:
 		turn_motor(MOTORPORT, -45, 350)
-		BOWLPOS = 0
+
+	global BOWLPOS
+	BOWLPOS = not BOWLPOS
 
 def turn_gate():
 	print_console("Turning gate")
-	global GATEPOS
+	# If gate is closed then open
 	if GATEPOS == 0:
 		turn_motor(GATEPORT, 45, 630)
-		GATEPOS = 1
+	# If date is open then close
 	elif GATEPOS == 1:
 		turn_motor(GATEPORT, -45, 630)
-		GATEPOS = 0
+		
+	global GATEPOS
+	GATEPOS = not GATEPOS
 
+# Turns the motor connected to {port} on the NXT. A negative speed value turns the motor the opposite direction.
 def turn_motor(port, speed, range):
 	motor = Motor(BRICK, port)
 	motor.turn(int(speed * MOTORSPEED), range)
 
+# Returns the range value from the ultrasonic sensor connected to the NXT.
 def get_range():
 	return Ultrasonic(BRICK, ULTRASONICPORT).get_sample()
 
+# Gets a action from the agent
 def get_action(animal):
-    state = np.reshape(animal, [1, 1])
-    action = agent.predict(state)
-    return action
+	state = np.reshape(animal, [1, 1])
+	action = agent.predict(state)
+	return action
 
+# Using Reinforcement learning to dispense the food
 def rl_dispense_food(animal):
 	action = get_action(animal)
 	enviroment_step(action)
@@ -168,7 +187,7 @@ def rl_dispense_food(animal):
 	action = get_action(animal)
 	enviroment_step(action)
 
-	#Rotate the bowl so the right side faces outward to the animal
+	# Rotate the bowl so the right side faces outward to the animal
 	rotate_bowl()
 	
 	# Open gate
@@ -177,28 +196,44 @@ def rl_dispense_food(animal):
 	# Push bowl out
 	change_bowl_pos()
  
+# Depending on the enviroment state and action the bowl is rotated or the containers are opened.
 def enviroment_step(action):
-    global NEXT_STATE
+	global NEXT_STATE
 
-    if NEXT_STATE == 0:
-        rotate_bowl_rl(action)
-    elif NEXT_STATE == 1:
-        # Dispense food
-        open_containers(action)
-        NEXT_STATE = 0
+	if NEXT_STATE == 0:
+		# Bowl receives an action
+		rotate_bowl_rl(action)
+	elif NEXT_STATE == 1:
+		# Containers receive an action
+		open_containers_rl(action)
+		NEXT_STATE = 0
 
 def rotate_bowl_rl(action):
-    # No rotation of bowl
-    if (action == 0):
-        print('not rotating bowl')
-    # Rotate bowl
-    elif (action == 1):
-        print('rotating bowl')
-        rotate_bowl()
+	# No rotation of bowl
+	if (action == 0):
+		print_console('Not rotating bowl')
+	# Rotate bowl
+	elif (action == 1):
+		print_console('Rotating bowl')
+		rotate_bowl()
 
-    # Increase function step
-    global NEXT_STATE
-    NEXT_STATE += 1
+	# Increase function step
+	global NEXT_STATE
+	NEXT_STATE += 1
+
+def open_containers_rl(action):
+	# No rotation of container
+	if (action == 0):
+		print_console('Rotating container to cat')
+		open_containers(CAT)
+	# Rotate container
+	elif (action == 1):
+		print_console('Rotating container to dog')
+		open_containers(DOG)
+
+	# Increase function step
+	global NEXT_STATE
+	NEXT_STATE = 0
 
 if __name__ == "__main__":
 	main()
