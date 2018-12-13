@@ -2,7 +2,7 @@ import nxt.locator
 from nxt.motor import *
 from nxt.sensor import *
 
-MOTORSPEED = 35
+MOTORSPEED = 22
 STEPSIZE = 90
 BRICK = nxt.locator.find_one_brick()
 

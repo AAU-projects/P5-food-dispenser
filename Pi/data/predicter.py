@@ -22,7 +22,7 @@ def convert_to_array(img):
 # If prediction < THRESHOLD then disregard prediction 
 def get_class_with_threshold(score):
     print(score[0])
-    for x in range(0, len(score)):
+    for x in range(0, len(score[0])):
         if score[0][x] > THRESHOLD:
             return x
     return -1

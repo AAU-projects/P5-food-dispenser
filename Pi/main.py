@@ -30,7 +30,7 @@ JUNK = 2
 BRICK = nxt.locator.find_one_brick()
 
 # Setup agent
-agent = DispenseAgent(3, 2)
+agent = DispenseAgent(1, 2)
 agent.load("food_dispenser.h5")
 
 def main():
@@ -67,12 +67,16 @@ def main():
 				
 				# Wait for the animal to finish, then close
 				wait_and_close()
+				
+				if result == CAT:
+					# Return bowl to start position
+					rotate_bowl()
 			else:
 				print_console("Junk")
 
 # Prints message to console
 def print_console(input, type_print="INFO"):
-	print(f"[{type_print}] {input}")
+	print("[{0}] {1}".format(type_print, input))
 
 # Moves the bowl a small distance forward
 def bowl_forward_small():
@@ -97,10 +101,10 @@ def wait_and_close():
 		
 		if oldDist == newDist:
 			count += 1
-			print_console(f"Wait count: {count}/{wait_count}")
+			print_console("Wait count: {0}/{1}".format(count, wait_count))
 		else:
 			count = 0
-			print_console(f"Movement detected")
+			print_console("Movement detected")
 		
 		if count >= wait_count:
 			done = 1
@@ -108,20 +112,16 @@ def wait_and_close():
 	change_bowl_pos()
 	turn_gate()
 
-	if result == CAT:
-		# Return bowl to start position
-		rotate_bowl()
-
 # Open food containers according to the animal 
 def open_containers(action):
 	bowl_forward_small()
 	# Dispense cat food
-	if(animal == CAT):
+	if(action == CAT):
 		turn_motor(BOWLPORT, 45, 90)
 		sleep(1)
 		turn_motor(BOWLPORT, -45, 90)
 	# Dispense dog food 
-	elif (animal == DOG):
+	elif (action == DOG):
 		turn_motor(BOWLPORT, -45, 90)
 		sleep(1)
 		turn_motor(BOWLPORT, 45, 90)
@@ -129,19 +129,20 @@ def open_containers(action):
 
 def rotate_bowl():
 	# Rotate the bowl 180 by moving it back and forward to make sure we dont dispense the food prematurely.
-	turn_motor(BOWLPORT, 45, 50)
+	turn_motor(BOWLPORT, 45, 35)
 	bowl_forward_small()
-	turn_motor(BOWLPORT, -45, 50)
+	turn_motor(BOWLPORT, -45, 35)
 	bowl_backward_small()
-	turn_motor(BOWLPORT, 45, 50)
+	turn_motor(BOWLPORT, 45, 36)
 	bowl_forward_small()
-	turn_motor(BOWLPORT, -45, 50)
+	turn_motor(BOWLPORT, -45, 36)
 	bowl_backward_small()
 
 	global BOWLROT 
 	BOWLROT = not BOWLROT
 
 def change_bowl_pos():
+	global BOWLPOS
 	print_console("Moving bowl")
 	#  Drive bowl in and out
 	if BOWLPOS == 0:
@@ -149,10 +150,10 @@ def change_bowl_pos():
 	elif BOWLPOS == 1:
 		turn_motor(MOTORPORT, -45, 350)
 
-	global BOWLPOS
 	BOWLPOS = not BOWLPOS
 
 def turn_gate():
+	global GATEPOS
 	print_console("Turning gate")
 	# If gate is closed then open
 	if GATEPOS == 0:
@@ -161,7 +162,6 @@ def turn_gate():
 	elif GATEPOS == 1:
 		turn_motor(GATEPORT, -45, 630)
 		
-	global GATEPOS
 	GATEPOS = not GATEPOS
 
 # Turns the motor connected to {port} on the NXT. A negative speed value turns the motor the opposite direction.
