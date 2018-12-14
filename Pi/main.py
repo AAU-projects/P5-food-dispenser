@@ -203,6 +203,7 @@ def enviroment_step(action):
 	if NEXT_STATE == 0:
 		# Bowl receives an action
 		rotate_bowl_rl(action)
+		NEXT_STATE += 1
 	elif NEXT_STATE == 1:
 		# Containers receive an action
 		open_containers_rl(action)
@@ -217,10 +218,6 @@ def rotate_bowl_rl(action):
 		print_console('Rotating bowl')
 		rotate_bowl()
 
-	# Increase function step
-	global NEXT_STATE
-	NEXT_STATE += 1
-
 def open_containers_rl(action):
 	# No rotation of container
 	if (action == 0):
@@ -230,10 +227,6 @@ def open_containers_rl(action):
 	elif (action == 1):
 		print_console('Rotating container to dog')
 		open_containers(DOG)
-
-	# Increase function step
-	global NEXT_STATE
-	NEXT_STATE = 0
 
 if __name__ == "__main__":
 	main()
