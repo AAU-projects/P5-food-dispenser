@@ -1,3 +1,5 @@
 Model Creation/*
 .idea/*
 .vs/*
+__pycache__/*
+.vscode/*
