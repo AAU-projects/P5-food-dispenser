@@ -5,3 +5,6 @@ nxt-python*
 opencv*
 random_dog_cat*
 bob.py
+venv/*
+data/*
+pictures/*
