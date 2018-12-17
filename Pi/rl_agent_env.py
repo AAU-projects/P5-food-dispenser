@@ -95,7 +95,7 @@ class FoodDispenser:
 
         self.done = False
 
-        return [self.predict, self.bowl_position, self.dispenser_position]
+        return [self.predict]
 
     # Determines what reward to give the agent, depending on the action taken.
     def rotate_bowl(self, action):
@@ -144,7 +144,7 @@ class FoodDispenser:
             self.rotate_dispenser(action)
             self.done = True
             
-        return [self.predict, self.bowl_position, self.dispenser_position], self.reward, self.done
+        return [self.predict], self.reward, self.done
 
 EPISODES = 200
 if __name__ == "__main__":
