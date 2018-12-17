@@ -175,8 +175,7 @@ def get_range():
 
 # Gets a action from the agent
 def get_action(animal):
-	state = np.reshape(animal, [1, 1])
-	action = agent.predict(state)
+	action = agent.predict([animal])
 	return action
 
 # Using Reinforcement learning to dispense the food
