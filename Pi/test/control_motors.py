@@ -2,13 +2,14 @@ import nxt.locator
 from nxt.motor import *
 from nxt.sensor import *
 
-MOTORSPEED = 22
+MOTORSPEED = 22   # found from trial and error
 STEPSIZE = 90
 BRICK = nxt.locator.find_one_brick()
 
+
 def control_loop():
     while(True):
-        text = input("cmds: opengate, closegate, bowlin, bowlout, rotbowlf, rotbowlt, portcharT/B:\n")
+        text = input("cmds: opengate, closegate, bowlin, bowlout, rotbowl+, rotbowl-, portchar+/-:\n")
         
         if(text == "opengate"):
             turn_gate(False)
@@ -22,19 +23,19 @@ def control_loop():
             rotate_bowl(False)
         elif(text == "rotbowl-"):
             rotate_bowl(True)
-        elif(text[0] == 'A'):
+        elif(text[0] == 'A'): # MOTORPORT = PORT A
             step = int(text[3:])
             if(text[1] == '+'):
                 rotate_motor(PORT_A, 1, step)
             elif(text[1] == '-'):
                 rotate_motor(PORT_A, -1, step)
-        elif(text[0] == 'B'):
+        elif(text[0] == 'B'): # BOWLPORT = PORT B
             step = int(text[3:])
             if(text[1] == '+'):
                 rotate_motor(PORT_B, 1, step)
             elif(text[1] == '-'):
                 rotate_motor(PORT_B, -1, step)
-        elif(text[0] == 'C'):
+        elif(text[0] == 'C'): # GATEPORT = PORT C
             step = int(text[3:])
             if(text[1] == '+'):
                 rotate_motor(PORT_C, 1, step)
@@ -44,13 +45,14 @@ def control_loop():
             print("Unrecognized input")
                 
 def turn_gate(reverse):
+    # Opens the gate
 	if(reverse == True):
-		rotate_motor(PORT_C, -1, 630)
+		rotate_motor(PORT_C, -1, 630) # rotate_motor(port, speed, degrees)
 	else:
 		rotate_motor(PORT_C, 1, 630)
 
 def change_bowl_pos(reverse):
-	#  Drive bowl in and out
+	# Drive bowl in and out
 	if(reverse == True):
 		rotate_motor(PORT_A, 1, 350)
 	else:
