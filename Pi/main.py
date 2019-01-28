@@ -30,7 +30,7 @@ JUNK = 2
 BRICK = nxt.locator.find_one_brick()
 
 # Setup agent
-agent = DispenseAgent(1, 2)
+agent = DispenseAgent(1, 2) # (state size, action size)
 agent.load("food_dispenser.h5")
 
 def main():
@@ -66,7 +66,7 @@ def main():
 					print_console(e)
 					print_console("Trying again")
 			
-			if not (result == -1 or result == 2):
+			if not (result == -1 or result == 2): # -1 is unclassified as it is below threshold and 2 is junk class
 				# Send result to the reinforment model
 				rl_dispense_food(result)
 				
@@ -114,10 +114,10 @@ def wait_and_close():
 		if count >= wait_count:
 			done = 1
 
-	change_bowl_pos()
-	turn_gate()
+	change_bowl_pos() # Extends or retracts bowl, depending on which state it is in
+	turn_gate()       # Opens or closes the gate, depending on which state it is in
 
-# Open food containers according to the animal 
+# Open food containers according to the animal (action) 
 def open_containers(action):
 	bowl_forward_small()
 	# Dispense cat food
@@ -146,12 +146,14 @@ def rotate_bowl():
 	global BOWLROT 
 	BOWLROT = not BOWLROT
 
+# Extends or retracts bowl, depending on which state it is in
 def change_bowl_pos():
 	global BOWLPOS
 	print_console("Moving bowl")
-	#  Drive bowl in and out
+	# Extend bowl 
 	if BOWLPOS == 0:
 		turn_motor(MOTORPORT, 45, 350)
+    # Retract bowl
 	elif BOWLPOS == 1:
 		turn_motor(MOTORPORT, -45, 350)
 
@@ -163,7 +165,7 @@ def turn_gate():
 	# If gate is closed then open
 	if GATEPOS == 0:
 		turn_motor(GATEPORT, 45, 630)
-	# If date is open then close
+	# If gate is open then close
 	elif GATEPOS == 1:
 		turn_motor(GATEPORT, -45, 630)
 		
@@ -178,19 +180,18 @@ def turn_motor(port, speed, range):
 def get_range():
 	return Ultrasonic(BRICK, ULTRASONICPORT).get_sample()
 
-# Gets a action from the agent
+# Gets an action from the agent
 def get_action(animal):
-	state = np.reshape(animal, [1, 1])
-	action = agent.predict(state)
+	action = agent.predict([animal]) # Predicts an action from the state of the environment 
 	return action
 
 # Using Reinforcement learning to dispense the food
 def rl_dispense_food(animal):
-	action = get_action(animal)
-	enviroment_step(action)
+	action = get_action(animal) # The agent predicts an action for bowl rotation out from the predicted animal
+	enviroment_step(action) # Rotates the bowl, depending on what action was predicted
 
-	action = get_action(animal)
-	enviroment_step(action)
+	action = get_action(animal) # Predicts what food to dispense
+	enviroment_step(action) # Dispenses the food, depending on what action was predicted
 
 	# Rotate the bowl so the right side faces outward to the animal
 	rotate_bowl()

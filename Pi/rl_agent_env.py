@@ -12,8 +12,12 @@ INPUT:
     [1] - Model predicted that the image was of a dog
 
 OUTPUT:
+    State 0
     [0] - rotate for cat
     [1] - rotate for dog
+    State 1
+    [0] - open dispenser for cat
+    [1] - open dispenser for dog
 '''
 # https://keon.io/deep-q-learning/
 # http://adventuresinmachinelearning.com/reinforcement-learning-tutorial-python-keras/
@@ -43,8 +47,8 @@ class DispenseAgent:
 
     # Will either guess what action to take, or try to use the model to predict an action.
     def act(self, state):
-        if np.random.rand() <= self.epsilon:
-            return random.randrange(self.action_size)   # Guesses and action.
+        if np.random.rand() <= self.epsilon: 
+            return random.randrange(self.action_size)   # Guesses an action.
         act_values = self.model.predict(state)          # Predicts an action.
         return np.argmax(act_values[0])                 # Returns action.
 
@@ -95,7 +99,7 @@ class FoodDispenser:
 
         self.done = False
 
-        return [self.predict, self.bowl_position, self.dispenser_position]
+        return [self.predict]
 
     # Determines what reward to give the agent, depending on the action taken.
     def rotate_bowl(self, action):
@@ -138,13 +142,13 @@ class FoodDispenser:
 
     # Determines what function to execute depending on the {next_state}. Returns the current state.
     def step(self, action):
-        if self.next_state == 0:
+        if self.next_state ==  0:
             self.rotate_bowl(action)
         elif self.next_state == 1:
             self.rotate_dispenser(action)
             self.done = True
             
-        return [self.predict, self.bowl_position, self.dispenser_position], self.reward, self.done
+        return [self.predict], self.reward, self.done
 
 EPISODES = 200
 if __name__ == "__main__":
@@ -168,7 +172,7 @@ if __name__ == "__main__":
                         .format(e + 1, EPISODES, reward, agent.epsilon, step))
                 break
 
-            if len(agent.memory) > batch_size:                                      # Train the agent with the experience of the episode.
+            if len(agent.memory) > batch_size:                                      # Train the agent with the experience of the episodes.
                 agent.replay(batch_size)
                 
     print('Saving model')
