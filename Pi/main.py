@@ -1,5 +1,4 @@
 import nxt
-import numpy
 import os
 import nxt.locator
 import random
@@ -21,8 +20,8 @@ MOTORPORT = PORT_A
 GATEPORT = PORT_C
 GATEPOS = 0	 # 0 = closed, 1 = open
 MOTORSPEED = 0.5
-NEXT_STATE = 0
-DIGITAL = 0
+NEXT_STATE = 0 # the state of the dispenser, there are two states - 0 for the state of controlling the food bowl and 1 for controlling the food dispenser
+DIGITAL = 0 # 1 for digital pictures 0 for webcam
 
 CAT = 0
 DOG = 1
@@ -50,13 +49,12 @@ def main():
 			
 			while True:
 				try:
-					
 					if DIGITAL == 1:
 						print_console("Taking pictures digitally")
-						take_pictures_digital(DIRECTORY)
+						take_pictures_digital(DIRECTORY) # Select one of the digital pictures from digital_pics folder
 					else:
 						print_console("Taking pictures with camera")
-						take_pictures_CV2(DIRECTORY)
+						take_pictures_CV2(DIRECTORY) # Takes a picture with the webcam and saves it in DIRECTORY
 
 					# Classify picture
 					print_console("Predicting from pictures")
