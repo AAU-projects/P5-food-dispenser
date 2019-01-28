@@ -7,7 +7,7 @@ import numpy as np
 import warnings
 from nxt.sensor import *
 from nxt.motor import *
-from data.picture import take_pictures_CV2
+from data.picture import take_pictures_CV2, take_pictures_digital 
 from data.predicter import predict_folder
 from time import sleep
 from rl_agent_env import DispenseAgent, FoodDispenser
@@ -22,6 +22,7 @@ GATEPORT = PORT_C
 GATEPOS = 0	 # 0 = closed, 1 = open
 MOTORSPEED = 0.5
 NEXT_STATE = 0
+DIGITAL = 0
 
 CAT = 0
 DOG = 1
@@ -49,16 +50,22 @@ def main():
 			
 			while True:
 				try:
-					print_console("Taking pictures")
-					take_pictures_CV2(DIRECTORY)
+					
+					if DIGITAL == 1:
+						print_console("Taking pictures digitally")
+						take_pictures_digital(DIRECTORY)
+					else:
+						print_console("Taking pictures with camera")
+						take_pictures_CV2(DIRECTORY)
 
 					# Classify picture
 					print_console("Predicting from pictures")
 					result = predict_folder(DIRECTORY)
 					print(result)
 					break
-				except Exception:
+				except Exception as e:
 					print_console("Image capture fail", "ERROR")
+					print_console(e)
 					print_console("Trying again")
 			
 			if not (result == -1 or result == 2):
@@ -129,13 +136,13 @@ def open_containers(action):
 
 def rotate_bowl():
 	# Rotate the bowl 180 by moving it back and forward to make sure we dont dispense the food prematurely.
-	turn_motor(BOWLPORT, 45, 35)
+	turn_motor(BOWLPORT, 45, 37)
 	bowl_forward_small()
-	turn_motor(BOWLPORT, -45, 35)
+	turn_motor(BOWLPORT, -45, 37)
 	bowl_backward_small()
-	turn_motor(BOWLPORT, 45, 36)
+	turn_motor(BOWLPORT, 45, 37)
 	bowl_forward_small()
-	turn_motor(BOWLPORT, -45, 36)
+	turn_motor(BOWLPORT, -45, 37)
 	bowl_backward_small()
 
 	global BOWLROT 

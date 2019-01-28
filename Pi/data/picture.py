@@ -17,22 +17,28 @@ def delete_all_files(destination):
 
 def take_pictures_CV2(destination, number_of_images=1):
 	delete_all_files(destination)
-	capture = cv2.VideoCapture(WEBCAM)
 	for x in range(0, number_of_images):
-		ret, frame = capture.read()
-		cv2.imwrite(os.path.join(destination, str(x)+".png"), frame)
-		sleep(1)
+		while(True):
+			capture = cv2.VideoCapture(WEBCAM)
+			ret, frame = capture.read()
+			if(ret == True):
+				cv2.imwrite(os.path.join(destination, str(x)+".png"), frame)
+				break
+			capture.release()
+			sleep(1)
 	capture.release()
 
 
-def take_pictures_digital(destination, cats_dogs_destination):
+def take_pictures_digital(destination):
 	delete_all_files(destination)
-	files = glob.glob(cats_dogs_destination + "/*")
-	image = choice(files)
-	print(len(files))
+	text = input("dogs or cats?")
+	textnum = input("Provide picture number..")
+	image = os.path.join(os.getcwd(), "digital_pics", text, str(text)+str(textnum)+".jpg")
+	#files = glob.glob(cats_dogs_destination + "/*")
+	#image = choice(files)
+	#print(len(files))
 	print(image)
 	image_destination = destination + "/0.jpg"
-	print(image_destination)
 
 	shutil.copy2(image, image_destination)
 
