@@ -20,7 +20,7 @@ evaluate_models.py 1        - creates new numpy files for evalset and evaluates 
 if __name__ == "__main__":
     if (len(sys.argv) > 1):
         # Generates a new evalset
-        vars.picture_folders = ['test']
+        vars.picture_folders = ['evalset']
         ip = ImageProcessing()
         ip.generate_numpy_files()
 

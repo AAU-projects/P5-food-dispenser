@@ -104,7 +104,7 @@ class TrainModel:
         FileSystem.save_model_summary(lines, model_path, model_name, self.training_lenght,
                                         self.validation_lenght)
 
-        # Renames model log
+        # Renames tensorboard log
         FileSystem.rename_model_log(vars.tensorboard_name, model_name)
 
 

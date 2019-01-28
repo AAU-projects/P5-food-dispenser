@@ -6,7 +6,7 @@ from time import time
 These variables was often used in the different classes
 and instead of declaring them in each class, they were
 all declared in here. This is also good for changing variables, 
-and results in a more flexiable code.
+and results in a more flexible code.
 '''
 
 # Hidden vars
@@ -23,6 +23,6 @@ num_classes = len(classes)
 
 # Callbacks
 tensorboard_name = str(time())
-__tensorboard = TensorBoard(log_dir="logs/{}".format(tensorboard_name));
+__tensorboard = TensorBoard(log_dir="logs/{}".format(tensorboard_name))
 __earlyStop = EarlyStopping(monitor='val_acc', min_delta=0, patience=20, verbose=1, mode='auto', restore_best_weights=True)
 callbacks = [__tensorboard]

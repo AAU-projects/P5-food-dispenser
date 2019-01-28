@@ -51,17 +51,20 @@ class ImageProcessing:
             self.save_images(data_full, labels_full, folder_path, dataset_type)
 
     # Loads all pictures in a class
+    # training_path path to the dataset class folder
+    # image_label is the class, i.e cat, dog, junk
+    # class_value is the label value that describes the class
     def load_class_pictures(self, training_path, image_label, class_value):
         data = []
         labels = []
 
         dataset_path = os.path.join(os.getcwd(), training_path, image_label)
         if os.path.exists(dataset_path):
-            pictures = glob(dataset_path + "/*.jpg")
-            pictures.extend(glob(dataset_path + "/*.png"))
+            pictures = glob(dataset_path + "/*.jpg")            
+            pictures.extend(glob(dataset_path + "/*.png"))      # Retrives all .jpg and png images in dataset_path
             for picture in pictures:
-                data.append(self.load_image(picture))
-                labels.append(class_value)
+                data.append(self.load_image(picture))           # Appends each image to the data array
+                labels.append(class_value)                      # Appends a class_value to each labels that corresponds to the image class
                 if (len(data) % 500 == 0):
                     print(f"[LOG] {len(data)}")
         else:
@@ -69,12 +72,12 @@ class ImageProcessing:
 
         return data, labels, dataset_path
 
-    # Generates numpy files for all sets
+    # Generates numpy files for all datasets
     def generate_numpy_files(self, path=os.getcwd()):
         for i in range(0, len(vars.picture_folders)):
             self.load_class_folders(vars.picture_folders[i], path)
 
-    # Retrieves the numpy files for the given settype
+    # Retrieves the numpy files for the given dataset type
     def retrive_dataset(self, settype):
         print("[LOG] Loading images")
         animals = np.load(f"{vars.picturePath}/{settype}/pictures_{settype}.npy")
@@ -90,6 +93,7 @@ class ImageProcessing:
 
         # Shuffles dataset        
         pictures, labels = self.__shuffle(pictures, labels)
+        # /255 Normalizer so that all pixels has a value between 0 - 1
         pictures = pictures.astype('float32')/255
 
         # One hot encoding
@@ -103,15 +107,16 @@ class ImageProcessing:
         pictures, labels = self.__shuffle(pictures, labels)
         train_size = int(len(pictures) * procent_split)
 
-        # Get training set
+        # Get training set from 0 - 0.9
         pictures_train = pictures[:train_size]
         labels_train = labels[:train_size]
 
-        # Get validation set
+        # Get validation set from 0.9 to 1
         pictures_validation = pictures[train_size:]
         labels_validation = labels[train_size:]
 
         # Format picrures to right format
+        # /255 Normalizer so that all pixels has a value between 0 - 1
         pictures_train = pictures_train.astype('float32')/255
         pictures_validation = pictures_validation.astype('float32')/255
 
